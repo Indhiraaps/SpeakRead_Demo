@@ -74,7 +74,7 @@ try {
             <p style="color: #64748b;">No classes created yet. Click "Create New Class" to begin.</p>
         <?php else: ?>
             <?php foreach ($classes as $class): ?>
-                <div class="class-card" onclick="window.location.href='class_details.php?grade=<?php echo urlencode($class['Grade']); ?>'">
+                <div class="class-card" onclick="window.location.href='lessons.php?grade=<?php echo urlencode($class['Grade']); ?>'">
                     <h3><?php echo htmlspecialchars($class['Grade']); ?></h3>
                     <p>Click to manage homework & lessons</p>
                 </div>

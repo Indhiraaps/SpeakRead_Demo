@@ -46,6 +46,7 @@ try {
             LID INT AUTO_INCREMENT PRIMARY KEY,
             Grade VARCHAR(20) NOT NULL,
             LessonName VARCHAR(150) NOT NULL,
+            ParaNumber	INT NOT NULL,
             Para TEXT NOT NULL
         )
     ");
