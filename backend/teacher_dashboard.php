@@ -7,7 +7,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'teacher') {
 }
 
 // Database Connection
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = 'skdn1418';
+$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = '12345678';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
