@@ -7,7 +7,8 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $stmtL = $pdo->prepare("SELECT DISTINCT LessonName FROM Lessons WHERE Grade = ?");
+    // Fetch unique LessonNumber and LessonName, ordered numerically
+    $stmtL = $pdo->prepare("SELECT DISTINCT LessonNumber, LessonName FROM Lessons WHERE Grade = ? ORDER BY LessonNumber ASC");
     $stmtL->execute([$grade]);
     $lessons = $stmtL->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { die("Error: " . $e->getMessage()); }
@@ -15,7 +16,7 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Management - <?php echo $grade; ?></title>
+    <title>Management - <?php echo htmlspecialchars($grade); ?></title>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; display: flex; }
         .sidebar { 
@@ -23,7 +24,7 @@ try {
             background: white; border-right: 1px solid #e2e8f0; padding: 24px; box-sizing: border-box; 
         }
         .content { 
-            margin-left: 260px; /* FIX: Prevents sidebar from hiding content */
+            margin-left: 260px; 
             padding: 40px; width: calc(100% - 260px); box-sizing: border-box; 
         }
         .logo { color: #2563eb; font-weight: 800; font-size: 24px; text-decoration: none; display: block; margin-bottom: 40px; }
@@ -34,13 +35,28 @@ try {
         .day-box { background: #eff6ff; padding: 12px; border-radius: 8px; text-align: center; flex: 1; border: 1px solid #dbeafe; }
         .day-label { font-size: 11px; font-weight: 800; color: #3b82f6; margin-bottom: 5px; }
         
-        /* The Long Card */
         .long-card { 
-            border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 24px; 
+            border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 24px; 
             margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: white; 
             display: flex; align-items: center; text-decoration: none; color: #334155; font-weight: 600; 
         }
         .long-card:hover { border-color: #2563eb; background: #f8fafc; transform: translateX(5px); }
+        
+        /* Circular Lesson Number Styling */
+        .num-circle { 
+            width: 32px; 
+            height: 32px; 
+            background-color: #ebf2ff; 
+            color: #2563eb; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 14px; 
+            font-weight: 800; 
+            margin-right: 15px;
+            flex-shrink: 0; /* Prevents circle from squeezing */
+        }
     </style>
 </head>
 <body>
@@ -64,7 +80,8 @@ try {
             <div class="section-title">Select a Lesson</div>
             <?php foreach($lessons as $l): ?>
                 <a href="paragraphs.php?grade=<?php echo urlencode($grade); ?>&lesson=<?php echo urlencode($l['LessonName']); ?>" class="long-card">
-                    <span style="margin-right: 15px;"></span> <?php echo $l['LessonName']; ?>
+                    <div class="num-circle"><?php echo htmlspecialchars($l['LessonNumber']); ?></div>
+                    <?php echo htmlspecialchars($l['LessonName']); ?>
                 </a>
             <?php endforeach; ?>
         </div>
