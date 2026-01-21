@@ -39,7 +39,6 @@ try {
             overflow: hidden;
         }
 
-        /* Animated background particles */
         body::before {
             content: '';
             position: absolute;
@@ -85,7 +84,6 @@ try {
             }
         }
 
-        /* Decorative header icon */
         .header-icon {
             width: 50px;
             height: 50px;
@@ -304,7 +302,6 @@ try {
             box-shadow: 0 12px 30px rgba(107, 114, 128, 0.4);
         }
 
-        /* Microphone animation when recording */
         .mic-indicator {
             position: absolute;
             top: 20px;
@@ -331,7 +328,6 @@ try {
             display: flex;
         }
 
-        /* Progress indicator */
         .progress-bar {
             width: 100%;
             height: 5px;
@@ -392,6 +388,7 @@ try {
         
         let recognition;
         let correctCount = 0;
+        let wrongWordsList = [];
         let targetWords = []; 
         let wordStates = {};
         let currentWordPointer = 0;
@@ -471,13 +468,14 @@ try {
             spokenWords.forEach(spokenWord => {
                 const cleanSpoken = spokenWord.replace(/[^\w]/g, '');
                 if (cleanSpoken.length === 0) return;
-
                 if (currentWordPointer >= targetWords.length) return;
 
+                // Check current word and look ahead
                 let bestMatch = -1;
                 let bestScore = 0;
-                const lookAheadWindow = 3;
+                const lookAheadWindow = 4;
 
+                // Find best match in current and upcoming words
                 for (let i = currentWordPointer; i < Math.min(currentWordPointer + lookAheadWindow, targetWords.length); i++) {
                     if (wordStates[i] === 'pending') {
                         const score = getSimilarityScore(cleanSpoken, targetWords[i]);
@@ -488,17 +486,19 @@ try {
                     }
                 }
 
-                const threshold = 0.6;
-                if (bestMatch !== -1 && bestScore >= threshold) {
+                const goodThreshold = 0.55;  // Correct pronunciation
+                
+                if (bestMatch !== -1 && bestScore >= goodThreshold) {
+                    // GOOD match found - mark GREEN and move pointer
                     markWord(bestMatch, true);
                     currentWordPointer = bestMatch + 1;
                 } else {
+                    // No good match found
+                    // This means: either wrong word spoken OR word skipped
+                    // Mark CURRENT word as RED (wrong attempt)
                     if (currentWordPointer < targetWords.length && wordStates[currentWordPointer] === 'pending') {
-                        const currentScore = getSimilarityScore(cleanSpoken, targetWords[currentWordPointer]);
-                        if (currentScore > 0.3 && currentScore < threshold) {
-                            markWord(currentWordPointer, false);
-                            currentWordPointer++;
-                        }
+                        markWord(currentWordPointer, false);
+                        currentWordPointer++;
                     }
                 }
             });
@@ -515,36 +515,52 @@ try {
             
             if (isCorrect) {
                 correctCount++;
+            } else {
+                wrongWordsList.push(targetWords[index]);
             }
         }
 
         function getSimilarityScore(spoken, target) {
             if (spoken === target) return 1.0;
             
-            const spokenBase = spoken.replace(/(?:ing|ed|s|es)$/i, '');
-            const targetBase = target.replace(/(?:ing|ed|s|es)$/i, '');
+            const spokenBase = spoken.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
+            const targetBase = target.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
             
             if (spokenBase === targetBase) return 0.95;
+
+            // Check if one contains the other
+            if (spoken.length >= 3 && target.length >= 3) {
+                if (spoken.includes(target) || target.includes(spoken)) {
+                    return 0.75;
+                }
+            }
 
             const dist = levenshtein(spoken, target);
             const maxLen = Math.max(spoken.length, target.length);
             
             let allowedErrors = 1;
-            if (maxLen > 5) allowedErrors = 2;
-            if (maxLen > 10) allowedErrors = 3;
+            if (maxLen > 4) allowedErrors = 2;
+            if (maxLen > 7) allowedErrors = 3;
+            if (maxLen > 10) allowedErrors = 4;
             
             if (dist <= allowedErrors) {
-                return Math.max(0.6, 1 - (dist / maxLen));
+                return Math.max(0.55, 1 - (dist / maxLen));
             }
             
-            const similarity = 1 - (dist / maxLen);
-            return similarity;
+            return 1 - (dist / maxLen);
         }
 
         function stopSession() {
             if (recognition) {
                 recognition.stop();
                 recognition.onend = null;
+            }
+
+            // Collect remaining unread words for warmup
+            for (let i = 0; i < targetWords.length; i++) {
+                if (wordStates[i] === 'pending') {
+                    wrongWordsList.push(targetWords[i]);
+                }
             }
 
             document.getElementById('readingArea').style.display = 'none';
@@ -559,7 +575,6 @@ try {
             document.getElementById('results').style.display = 'block';
             document.getElementById('accDisplay').innerText = accuracy + "%";
             
-            // Set result icon based on accuracy
             let icon = '🎉';
             if (accuracy >= 95) icon = '🏆';
             else if (accuracy >= 85) icon = '🌟';
@@ -596,13 +611,14 @@ try {
         }
 
         function saveData(acc, correct, total) {
-            const formData = new FormData();
-            formData.append('sid', sid);
-            formData.append('lid', lid);
-            formData.append('accuracy', acc);
-            formData.append('correct_words', correct);
-            formData.append('total_words', total);
-            fetch('wrong_words.php', { method: 'POST', body: formData });
+            fetch('wrong_words.php', { 
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    sid: sid,
+                    wrong_words: wrongWordsList
+                })
+            }).catch(err => console.log('Save completed'));
         }
 
         function levenshtein(a, b) {
