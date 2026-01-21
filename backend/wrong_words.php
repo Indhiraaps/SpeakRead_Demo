@@ -1,20 +1,21 @@
 <?php
 session_start();
-<<<<<<< HEAD
 
-// Database configuration
+// Database configuration - Using your local password
 $host = 'localhost';
 $db = 'speakread_db';
 $user = 'root';
 $pass = 'skdn1418';
 
+// Set header for JSON response
+header('Content-Type: application/json');
 
 try {
     // Connect to database
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Get POST data
+    // Get POST data (JSON sent from reading_practice.php)
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     
@@ -34,7 +35,7 @@ try {
         exit;
     }
     
-    // Prepare statement to insert wrong words
+    // Prepare statement to insert wrong words into Warmup table
     $stmt = $pdo->prepare("INSERT INTO Warmup (SID, IncorrectWord) VALUES (?, ?)");
     
     // Insert each wrong word
