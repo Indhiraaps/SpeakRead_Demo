@@ -1,6 +1,6 @@
 <?php
 session_start();
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = 'skdn1418';
+$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = '12345678';
 $lid = $_GET['lid'] ?? 0;
 $sid = $_GET['sid'] ?? 0;
 
