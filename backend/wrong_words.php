@@ -1,5 +1,6 @@
 <?php
 session_start();
+<<<<<<< HEAD
 
 // Database configuration
 $host = 'localhost';
@@ -7,8 +8,6 @@ $db = 'speakread_db';
 $user = 'root';
 $pass = 'skdn1418';
 
-// Set header for JSON response
-header('Content-Type: application/json');
 
 try {
     // Connect to database
