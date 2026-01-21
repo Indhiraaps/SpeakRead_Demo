@@ -19,14 +19,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["student_excel"])) {
             $stmt = $pdo->prepare("INSERT INTO Students (Name, Email, Password, Grade, TID) VALUES (?, ?, ?, ?, ?)");
 
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                $name = $data[0];
-                $email = $data[1];
-                // Default password is a hashed version of their name (lowercase) or a fixed string
-                $password = hash('sha256', 'password123'); 
+                // Skip empty rows if any
+                if (empty($data[0])) continue;
+
+                $name = trim($data[0]);
+                $email = trim($data[1]);
+                
+                // CHANGE: Take the password directly from the 3rd column of CSV
+                $password = trim($data[2]); 
                 
                 $stmt->execute([$name, $email, $password, $grade, $teacher_id]);
             }
             fclose($handle);
+            
+            // Redirect using the correct grade variable to avoid double upload and show correct data
             echo "<script>alert('Class created and students imported successfully!'); window.location.href='teacher_dashboard.php';</script>";
         }
     } catch (PDOException $e) {
