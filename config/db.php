@@ -2,7 +2,7 @@
 $host = 'localhost';
 $dbname = 'speakread_db';
 $user = 'root';
-$pass = '12345678';
+$pass = 'skdn1418';
 
 try {
     $pdo = new PDO(

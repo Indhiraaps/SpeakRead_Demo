@@ -4,10 +4,18 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'teacher') {
     header("Location: ../frontend/login.html");
     exit();
 }
+
+// Fixed Database Configuration
+$host = 'localhost'; 
+$db = 'speakread_db'; 
+$user = 'root'; 
+$pass = 'skdn1418'; 
+
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // Fetch unique grades for this teacher
     $stmt = $pdo->prepare("SELECT DISTINCT Grade FROM Students WHERE TID = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -21,6 +29,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - SpeakRead</title>
     <style>
+        /* Existing Styles */
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { margin: 0; background: #f8fafc; display: flex; }
         .sidebar { width: 260px; background: #ffffff; height: 100vh; border-right: 1px solid #e2e8f0; padding: 24px; position: fixed; }
@@ -33,8 +42,10 @@ try {
         .class-card { background: white; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; cursor: pointer; transition: 0.2s; }
         .class-card:hover { transform: translateY(-5px); border-color: #2563eb; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .btn { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        #classModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
+        #classModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index: 1000; }
         .modal-content { background:white; padding:30px; border-radius:12px; width:450px; }
+        
+        /* New Format Guide Styles */
         .format-box { background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 11px; }
         .format-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         .format-table th { text-align: left; color: #475569; border-bottom: 1px solid #cbd5e1; }
@@ -75,7 +86,7 @@ try {
             <input type="file" name="student_excel" accept=".csv, .xlsx" style="margin-bottom:15px;">
             
             <div class="format-box">
-                <strong style="color: #475569;">REQUIRED FORMAT:</strong>
+                <strong style="color: #475569;">REQUIRED CSV/EXCEL FORMAT:</strong>
                 <table class="format-table">
                     <tr><th>Name</th><th>Email</th><th>Password</th></tr>
                     

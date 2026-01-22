@@ -1,6 +1,6 @@
 <?php
 session_start();
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = '12345678';
+$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = 'skdn1418';
 $grade = $_GET['grade'] ?? 'Grade 3';
 
 try {
