@@ -163,14 +163,24 @@ try {
             margin: 10px;
         }
 
-        .btn-ready {
+        .btn-start {
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
 
-        .btn-ready:hover {
+        .btn-start:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5);
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
         }
 
         .btn-disabled {
@@ -261,7 +271,7 @@ try {
         }
     </style>
 </head>
-<body onload="startPractice()">
+<body>
     <div class="main-card">
         <div class="mic-indicator" id="micIndicator">🎤</div>
         
@@ -274,12 +284,15 @@ try {
             <div class="current-word" id="currentWord">GET READY</div>
             
             <div class="status-message" id="statusMessage">
-                Listen carefully and repeat the word...
+                Click START to begin practice
             </div>
             
             <div>
-                <button id="readyBtn" class="btn btn-ready" onclick="startListening()" style="display: none;">
-                    🎤 I'm Ready to Repeat
+                <button id="startBtn" class="btn btn-start" onclick="startPractice()">
+                    ▶ START PRACTICE
+                </button>
+                <button id="nextBtn" class="btn btn-next" onclick="nextWord()" style="display: none;">
+                    NEXT WORD →
                 </button>
             </div>
         </div>
@@ -316,14 +329,17 @@ try {
         let recognition = null;
         let correctCount = 0;
         let wordsToKeep = [];
+        let isListening = false;
 
         function startPractice() {
-            setTimeout(() => {
-                practiceWord();
-            }, 1000);
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            // Start with first word
+            speakAndShowWord();
         }
 
-        function practiceWord() {
+        function speakAndShowWord() {
             if (currentIndex >= warmupWords.length) {
                 showComplete();
                 return;
@@ -332,38 +348,54 @@ try {
             const word = warmupWords[currentIndex];
             currentAttempt = 0;
 
+            // Show the word
             document.getElementById('currentWord').innerText = word.toUpperCase();
             document.getElementById('progressText').innerText = `Word ${currentIndex + 1} of ${warmupWords.length}`;
-            document.getElementById('statusMessage').innerText = 'Listen carefully...';
-            document.getElementById('readyBtn').style.display = 'none';
+            document.getElementById('statusMessage').innerText = 'Listening...';
+            document.getElementById('micIndicator').classList.add('active');
 
-            // Speak the word
+            // First, say the word
             setTimeout(() => {
                 const msg = new SpeechSynthesisUtterance(word);
-                msg.lang = 'en-IN'; // Indian accent
+                msg.lang = 'en-IN';
                 msg.rate = 0.75;
                 msg.onend = () => {
                     setTimeout(() => {
-                        document.getElementById('statusMessage').innerText = 'Now repeat the word! Click when ready.';
-                        document.getElementById('readyBtn').style.display = 'inline-block';
-                    }, 800);
+                        // After speaking, start listening for the child's response
+                        document.getElementById('statusMessage').innerText = 'Your turn! Speak now...';
+                        startSpeechRecognition();
+                    }, 500);
                 };
                 window.speechSynthesis.speak(msg);
             }, 500);
         }
 
-        function startListening() {
-            document.getElementById('readyBtn').style.display = 'none';
-            document.getElementById('statusMessage').innerText = '🎤 Listening...';
-            document.getElementById('micIndicator').classList.add('active');
-
+        function startSpeechRecognition() {
+            if (isListening) return;
+            isListening = true;
+            
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             recognition.continuous = false;
             recognition.interimResults = false;
             recognition.lang = 'en-IN';
+            recognition.maxAlternatives = 3;
+
+            // Set timeout for no speech
+            const timeout = setTimeout(() => {
+                if (isListening) {
+                    recognition.stop();
+                    document.getElementById('statusMessage').innerText = 'No speech detected. Try again!';
+                    document.getElementById('nextBtn').style.display = 'inline-block';
+                    isListening = false;
+                }
+            }, 5000);
 
             recognition.onresult = (event) => {
+                clearTimeout(timeout);
+                isListening = false;
+                document.getElementById('micIndicator').classList.remove('active');
+                
                 const spoken = event.results[0][0].transcript.trim().toLowerCase().replace(/[^\w]/g, '');
                 const target = warmupWords[currentIndex].toLowerCase();
                 
@@ -371,96 +403,128 @@ try {
             };
 
             recognition.onerror = (event) => {
+                clearTimeout(timeout);
+                isListening = false;
                 document.getElementById('micIndicator').classList.remove('active');
-                document.getElementById('statusMessage').innerText = 'Could not hear you. Try again!';
-                document.getElementById('readyBtn').style.display = 'inline-block';
+                
+                if (event.error === 'no-speech') {
+                    document.getElementById('statusMessage').innerText = 'No speech detected. Try again!';
+                    document.getElementById('nextBtn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('statusMessage').innerText = 'Error listening. Try again!';
+                    document.getElementById('nextBtn').style.display = 'inline-block';
+                }
+            };
+
+            recognition.onend = () => {
+                clearTimeout(timeout);
+                isListening = false;
             };
 
             recognition.start();
         }
 
         function checkPronunciation(spoken, target) {
-            document.getElementById('micIndicator').classList.remove('active');
-            
             const similarity = getSimilarityScore(spoken, target);
             const isCorrect = similarity >= 0.65;
 
             if (isCorrect) {
-                // CORRECT!
+                // CORRECT pronunciation
                 correctCount++;
-                document.getElementById('statusMessage').innerText = '✅ Perfect! Excellent job!';
+                document.getElementById('statusMessage').innerHTML = '✅ <strong>Perfect!</strong> Excellent pronunciation!';
                 document.getElementById('currentWord').style.color = '#10b981';
                 
-                const praise = new SpeechSynthesisUtterance('Great job!');
-                praise.lang = 'en-IN'; // Indian accent
-                praise.onend = () => {
-                    setTimeout(() => {
-                        document.getElementById('currentWord').style.color = '';
-                        currentIndex++;
-                        practiceWord();
-                    }, 1500);
-                };
-                window.speechSynthesis.speak(praise);
-
+                // Play congratulation audio
+                setTimeout(() => {
+                    const praise = new SpeechSynthesisUtterance('Great job! Perfect!');
+                    praise.lang = 'en-IN';
+                    praise.rate = 0.9;
+                    praise.onend = () => {
+                        setTimeout(() => {
+                            // Move to next word after delay
+                            currentIndex++;
+                            document.getElementById('currentWord').style.color = '';
+                            document.getElementById('nextBtn').style.display = 'inline-block';
+                            document.getElementById('statusMessage').innerText = 'Ready for next word?';
+                        }, 500);
+                    };
+                    window.speechSynthesis.speak(praise);
+                }, 300);
+                
             } else {
-                // WRONG
+                // WRONG pronunciation
                 currentAttempt++;
                 
                 if (currentAttempt === 1) {
-                    // First wrong - try again
-                    document.getElementById('statusMessage').innerText = '❌ Not quite right. Listen again...';
+                    // First wrong attempt - give another chance
+                    document.getElementById('statusMessage').innerHTML = '❌ <strong>Not quite right.</strong> Listen carefully and try again...';
                     document.getElementById('currentWord').style.color = '#ef4444';
                     
-                    const encourage = new SpeechSynthesisUtterance('Try again!');
-                    encourage.lang = 'en-IN'; // Indian accent
-                    encourage.onend = () => {
-                        setTimeout(() => {
-                            // Repeat the word
-                            const repeat = new SpeechSynthesisUtterance(target);
-                            repeat.lang = 'en-IN'; // Indian accent
-                            repeat.rate = 0.65;
-                            repeat.onend = () => {
-                                setTimeout(() => {
-                                    document.getElementById('currentWord').style.color = '';
-                                    document.getElementById('statusMessage').innerText = 'Try one more time!';
-                                    document.getElementById('readyBtn').style.display = 'inline-block';
-                                }, 500);
-                            };
-                            window.speechSynthesis.speak(repeat);
-                        }, 500);
-                    };
-                    window.speechSynthesis.speak(encourage);
-
-                } else {
-                    // Second wrong - keep and move on
-                    wordsToKeep.push(target);
-                    document.getElementById('statusMessage').innerText = '💪 Keep practicing! Moving to next word...';
+                    // Speak the word again more slowly
+                    setTimeout(() => {
+                        const repeatMsg = new SpeechSynthesisUtterance('Try again. ' + target);
+                        repeatMsg.lang = 'en-IN';
+                        repeatMsg.rate = 0.6;
+                        repeatMsg.onend = () => {
+                            setTimeout(() => {
+                                // Give second chance
+                                document.getElementById('currentWord').style.color = '';
+                                document.getElementById('statusMessage').innerText = 'Second attempt. Speak now...';
+                                startSpeechRecognition();
+                            }, 500);
+                        };
+                        window.speechSynthesis.speak(repeatMsg);
+                    }, 500);
                     
-                    const next = new SpeechSynthesisUtterance('Keep practicing!');
-                    next.lang = 'en-IN'; // Indian accent
-                    next.onend = () => {
-                        setTimeout(() => {
-                            document.getElementById('currentWord').style.color = '';
-                            currentIndex++;
-                            practiceWord();
-                        }, 1800);
-                    };
-                    window.speechSynthesis.speak(next);
+                } else {
+                    // Second wrong attempt - mark for more practice and move on
+                    wordsToKeep.push(target);
+                    document.getElementById('statusMessage').innerHTML = '💪 <strong>Keep practicing this word!</strong> Moving to next word...';
+                    document.getElementById('currentWord').style.color = '#fb923c';
+                    
+                    // Play encouragement audio
+                    setTimeout(() => {
+                        const encouragement = new SpeechSynthesisUtterance('Keep practicing! Moving to next word.');
+                        encouragement.lang = 'en-IN';
+                        encouragement.onend = () => {
+                            setTimeout(() => {
+                                currentIndex++;
+                                document.getElementById('currentWord').style.color = '';
+                                document.getElementById('nextBtn').style.display = 'inline-block';
+                                document.getElementById('statusMessage').innerText = 'Ready for next word?';
+                            }, 500);
+                        };
+                        window.speechSynthesis.speak(encouragement);
+                    }, 300);
                 }
             }
+        }
+
+        function nextWord() {
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('statusMessage').innerText = 'Loading next word...';
+            
+            setTimeout(() => {
+                speakAndShowWord();
+            }, 800);
         }
 
         function getSimilarityScore(spoken, target) {
             if (spoken === target) return 1.0;
             
-            const spokenBase = spoken.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
-            const targetBase = target.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
+            // Handle verb forms and suffixes
+            const spokenBase = spoken.replace(/(?:ing|ed|s|es|ly|er|est)$/i, '');
+            const targetBase = target.replace(/(?:ing|ed|s|es|ly|er|est)$/i, '');
+            
             if (spokenBase === targetBase) return 0.95;
+            if (spokenBase === target || targetBase === spoken) return 0.85;
 
+            // Check for partial matches
             if (spoken.length >= 3 && target.length >= 3) {
                 if (spoken.includes(target) || target.includes(spoken)) return 0.75;
             }
 
+            // Calculate Levenshtein distance
             const dist = levenshtein(spoken, target);
             const maxLen = Math.max(spoken.length, target.length);
             
@@ -499,16 +563,25 @@ try {
             document.getElementById('correctWords').innerText = correctCount;
             document.getElementById('needPractice').innerText = needMore;
 
-            let message = needMore === 0 
-                ? '🎉 Amazing! You mastered all the words!' 
-                : `Good practice! Keep working on the remaining ${needMore} word${needMore > 1 ? 's' : ''}.`;
+            let message = '';
+            if (needMore === 0) {
+                message = '🎉 Amazing! You mastered all the words perfectly!';
+            } else if (correctCount === total) {
+                message = '🎊 Excellent! All words correct!';
+            } else if (correctCount >= total * 0.8) {
+                message = '👏 Great job! You did very well!';
+            } else {
+                message = `💪 Good practice! Keep working on ${needMore} word${needMore > 1 ? 's' : ''}.`;
+            }
             
             document.getElementById('finalMessage').innerText = message;
 
+            // Play final message
             const finalMsg = new SpeechSynthesisUtterance(
-                needMore === 0 ? 'Excellent! All words mastered!' : 'Good practice! Keep it up!'
+                needMore === 0 ? 'Excellent! All words mastered!' : 
+                'Good practice! Keep it up!'
             );
-            finalMsg.lang = 'en-IN'; // Indian accent
+            finalMsg.lang = 'en-IN';
             window.speechSynthesis.speak(finalMsg);
 
             // Update database

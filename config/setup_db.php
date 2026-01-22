@@ -67,13 +67,26 @@ try {
         CREATE TABLE IF NOT EXISTS Warmup (
             WID INT AUTO_INCREMENT PRIMARY KEY,
             SID INT,
-            IncorrectWord VARCHAR(100),
+            homework_mistakes TEXT DEFAULT NULL,
+            reading_practice_mistakes TEXT DEFAULT NULL,
             FOREIGN KEY (SID) REFERENCES Students(SID) ON DELETE CASCADE
         )
     ");
 
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS Scores (
+            Score_ID INT AUTO_INCREMENT PRIMARY KEY,
+            SID INT NOT NULL,
+            HID INT NOT NULL,
+            Accuracy DECIMAL(5,2) NOT NULL,
+            FOREIGN KEY (SID) REFERENCES Students(SID) ON DELETE CASCADE,
+            FOREIGN KEY (HID) REFERENCES Homework(HID) ON DELETE CASCADE
+        )
+    ");
+        
     echo "✔ Database & tables ready";
 
 } catch (PDOException $e) {
     die("Setup failed: " . $e->getMessage());
 }
+?>
