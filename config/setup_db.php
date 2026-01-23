@@ -1,7 +1,7 @@
 <?php
 $host = 'localhost';
 $user = 'root';
-$pass = '12345678'; // CHANGE THIS TO YOUR PASSWORD
+$pass = 'skdn1418'; // CHANGE THIS TO YOUR PASSWORD
 $dbname = 'speakread_db';
 
 try {
