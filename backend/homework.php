@@ -54,8 +54,7 @@ if (!$hw) { die("Homework not found."); }
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 20%, rgba(255,255,255,0.08) 0%, transparent 50%);
+                        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
             animation: float 15s ease-in-out infinite;
             pointer-events: none;
         }
@@ -73,8 +72,7 @@ if (!$hw) { die("Homework not found."); }
             max-width: 900px; 
             width: 90%; 
             max-height: 90vh;
-            box-shadow: 0 30px 90px rgba(0,0,0,0.25), 
-                        0 0 0 1px rgba(255,255,255,0.3) inset;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.25);
             text-align: center;
             position: relative;
             animation: slideUp 0.6s ease-out;
@@ -83,14 +81,8 @@ if (!$hw) { die("Homework not found."); }
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .header-icon {
@@ -126,11 +118,7 @@ if (!$hw) { die("Homework not found."); }
             font-weight: 600; 
             margin-bottom: 15px; 
             color: #4a5568; 
-            height: 25px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            min-height: 25px;
         }
 
         .reading-text { 
@@ -141,29 +129,17 @@ if (!$hw) { die("Homework not found."); }
             background: linear-gradient(to bottom right, #ffffff, #f8f9ff);
             border-radius: 20px; 
             text-align: left; 
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15),
-                        inset 0 2px 8px rgba(255,255,255,0.9);
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
             min-height: 180px;
             max-height: 40vh;
             overflow-y: auto;
             border: 2px solid rgba(102, 126, 234, 0.1);
-            position: relative;
             flex: 1;
-        }
-
-        .reading-text::before {
-            content: '📖';
-            position: absolute;
-            font-size: 80px;
-            opacity: 0.03;
-            right: 20px;
-            bottom: 10px;
-            pointer-events: none;
         }
 
         .word { 
             display: inline; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             color: #2d3748; 
             padding: 4px 6px; 
             border-radius: 6px;
@@ -174,14 +150,12 @@ if (!$hw) { die("Homework not found."); }
             color: #10b981 !important; 
             font-weight: 700;
             background: rgba(16, 185, 129, 0.1);
-            transform: scale(1.05);
         } 
 
         .word.incorrect { 
             color: #ef4444 !important; 
             font-weight: 700;
             background: rgba(239, 68, 68, 0.1);
-            transform: scale(1.05);
         }
 
         .controls { 
@@ -203,26 +177,6 @@ if (!$hw) { die("Homework not found."); }
             text-transform: uppercase;
             letter-spacing: 1px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
         }
 
         .btn-start { 
@@ -235,20 +189,10 @@ if (!$hw) { die("Homework not found."); }
             box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
         }
 
-        .btn-start:active {
-            transform: translateY(-1px);
-        }
-
         .btn-stop { 
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white; 
             display: none;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3); }
-            50% { box-shadow: 0 8px 35px rgba(239, 68, 68, 0.6); }
         }
 
         .btn-stop:hover {
@@ -266,7 +210,7 @@ if (!$hw) { die("Homework not found."); }
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* Warmup Practice Styles */
+        /* Warmup Styles */
         .warmup-container {
             display: none;
         }
@@ -274,7 +218,7 @@ if (!$hw) { die("Homework not found."); }
         .warmup-word-display {
             font-size: 72px;
             font-weight: 900;
-            margin: 40px 0;
+            margin: 30px 0;
             min-height: 100px;
             display: flex;
             align-items: center;
@@ -284,10 +228,11 @@ if (!$hw) { die("Homework not found."); }
             background: linear-gradient(135deg, #f87171, #fb923c);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            transition: color 0.3s ease;
         }
 
         .warmup-status {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 600;
             color: #1e293b;
             margin: 25px 0;
@@ -312,20 +257,14 @@ if (!$hw) { die("Homework not found."); }
             color: white;
         }
 
-        .btn-speak:hover {
+        .btn-speak:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5);
         }
 
-        .btn-next {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            display: none;
-        }
-
-        .btn-next:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(139, 92, 246, 0.5);
+        .btn-speak:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .result-icon {
@@ -345,9 +284,7 @@ if (!$hw) { die("Homework not found."); }
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
             margin: 10px 0;
-            text-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
         }
 
         .remarks { 
@@ -427,13 +364,10 @@ if (!$hw) { die("Homework not found."); }
         }
 
         @media (max-width: 768px) {
-            .main-card { padding: 25px 20px; max-height: 92vh; }
-            .reading-text { font-size: 22px; padding: 20px; max-height: 35vh; }
+            .main-card { padding: 25px 20px; }
+            .reading-text { font-size: 22px; padding: 20px; }
             .warmup-word-display { font-size: 48px; }
             .accuracy { font-size: 60px; }
-            .remarks { font-size: 18px; }
-            .btn { padding: 12px 30px; font-size: 16px; }
-            .header-icon { width: 40px; height: 40px; font-size: 24px; }
         }
     </style>
 </head>
@@ -459,531 +393,420 @@ if (!$hw) { die("Homework not found."); }
             <div class="result-icon" id="resultIcon">🎉</div>
             <div class="accuracy" id="accDisplay">0%</div>
             <div class="remarks" id="remDisplay"></div>
-            <button onclick="moveToDashboard()" class="back-btn" id="dashboardBtn">← Move to Dashboard</button>
+            <a href="student_dashboard.php" class="back-btn">← Back to Dashboard</a>
         </div>
 
-        <!-- Warmup Practice Section (hidden initially) -->
+        <!-- Warmup Practice Section -->
         <div id="warmupContainer" class="warmup-container">
             <div class="header-icon" style="background: linear-gradient(135deg, #f87171, #fb923c);">🔥</div>
-            <h2 class="homework-title" style="background: linear-gradient(135deg, #f87171, #fb923c);">
-                Practice Mistaken Words
+            <h2 class="homework-title" style="background: linear-gradient(135deg, #f87171, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Let's Correct Mistaken Words
             </h2>
             
             <div class="warmup-progress" id="warmupProgress">Word 1 of 0</div>
-            
             <div class="warmup-word-display" id="currentWordDisplay">GET READY</div>
-            
-            <div class="warmup-status" id="warmupStatus">
-                Click SPEAK to start reading...
-            </div>
+            <div class="warmup-status" id="warmupStatus">Click SPEAK button to repeat the word...</div>
             
             <div class="controls">
                 <button id="speakBtn" class="btn btn-speak" onclick="startWarmupListening()">
                     🎤 SPEAK
-                </button>
-                <button id="nextBtn" class="btn btn-next" onclick="nextWarmupWord()" style="display: none;">
-                    NEXT WORD →
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        const fullPara = `<?php echo addslashes($hw['H_Para']); ?>`;
-        const sid = <?php echo $student_id; ?>;
-        const hid = <?php echo $hid; ?>;
+    const fullPara = `<?php echo addslashes($hw['H_Para']); ?>`;
+    const sid = <?php echo $student_id; ?>;
+    const hid = <?php echo $hid; ?>;
+    
+    let recognition;
+    let correctCount = 0;
+    let wrongWordsList = [];
+    let targetWords = []; 
+    let wordStates = {};
+    let currentWordPointer = 0;
+
+    // Warmup variables
+    let warmupWords = [];
+    let currentWarmupIndex = 0;
+    let readingPracticeMistakes = [];
+    let warmupRecognition;
+    let silenceTimer;
+
+    const synth = window.speechSynthesis;
+    const readingArea = document.getElementById('readingArea');
+
+    // Setup paragraph
+    const tokens = fullPara.split(/(\s+)/); 
+    readingArea.innerHTML = tokens.map((token) => {
+        if (token.trim().length === 0) return token;
+        const clean = token.toLowerCase().replace(/[^\w]/g, '');
+        if (clean.length === 0) return token;
         
-        let recognition;
-        let correctCount = 0;
-        let wrongWordsList = [];
-        let targetWords = []; 
-        let wordStates = {};
-        let currentWordPointer = 0;
+        const idx = targetWords.length;
+        targetWords.push(clean);
+        wordStates[idx] = 'pending';
+        return `<span id="word-${idx}" class="word">${token}</span>`;
+    }).join('');
 
-        // Warmup variables
-        let warmupWords = [];
-        let currentWarmupIndex = 0;
-        let warmupAttempts = 0; // Track attempts per word
-        let warmupRecognition = null;
-        let readingPracticeWords = []; // Words for reading_practice_mistakes column
-        let isWarmupActive = false;
+    function welcomeVoice() {
+        const msg = new SpeechSynthesisUtterance("Click Start button and read aloud.");
+        msg.lang = 'en-IN';
+        synth.speak(msg);
+    }
 
-        const readingArea = document.getElementById('readingArea');
-        const tokens = fullPara.split(/(\s+)/); 
-        readingArea.innerHTML = tokens.map((token) => {
-            if (token.trim().length === 0) return token;
-            const clean = token.toLowerCase().replace(/[^\w]/g, '');
-            if (clean.length === 0) return token;
-            
-            const idx = targetWords.length;
-            targetWords.push(clean);
-            wordStates[idx] = 'pending';
-            return `<span id="word-${idx}" class="word">${token}</span>`;
-        }).join('');
+    function startSession() {
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'inline-block';
+        document.getElementById('status').innerText = "🎙️ Reading in progress...";
+        document.getElementById('micIndicator').classList.add('active');
+        document.getElementById('progressBar').style.display = 'block';
+        initSpeech();
+    }
 
-        function welcomeVoice() {
-            const msg = new SpeechSynthesisUtterance("Click Start button and read aloud.");
-            msg.lang = 'en-IN';
-            window.speechSynthesis.speak(msg);
-        }
+    function initSpeech() {
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-IN';
 
-        function startSession() {
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'inline-block';
-            document.getElementById('status').innerText = "🎙️ Reading in progress...";
-            document.getElementById('micIndicator').classList.add('active');
-            document.getElementById('progressBar').style.display = 'block';
-            initSpeech();
-        }
+        let lastProcessedLength = 0;
 
-        function initSpeech() {
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-IN';
-            recognition.maxAlternatives = 3;
+        recognition.onresult = (event) => {
+            for (let i = lastProcessedLength; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    const transcript = event.results[i][0].transcript.trim().toLowerCase();
+                    processTranscript(transcript);
+                    lastProcessedLength = i + 1;
+                    updateProgress();
+                }
+            }
+        };
 
-            let lastProcessedLength = 0;
+        recognition.onend = () => {
+            if (document.getElementById('stopBtn').style.display !== 'none') {
+                recognition.start();
+            }
+        };
+        recognition.start();
+    }
 
-            recognition.onresult = (event) => {
-                for (let i = lastProcessedLength; i < event.results.length; i++) {
-                    if (event.results[i].isFinal) {
-                        const transcript = event.results[i][0].transcript.trim().toLowerCase();
-                        processTranscript(transcript);
-                        lastProcessedLength = i + 1;
-                        updateProgress();
+    function processTranscript(transcript) {
+        const spokenWords = transcript.split(/\s+/).filter(w => w.length > 0);
+        spokenWords.forEach(spokenWord => {
+            const cleanSpoken = spokenWord.replace(/[^\w]/g, '');
+            if (cleanSpoken.length === 0 || currentWordPointer >= targetWords.length) return;
+
+            let bestMatch = -1;
+            let bestScore = 0;
+            for (let i = currentWordPointer; i < Math.min(currentWordPointer + 4, targetWords.length); i++) {
+                if (wordStates[i] === 'pending') {
+                    const score = getSimilarityScore(cleanSpoken, targetWords[i]);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMatch = i;
                     }
                 }
-            };
-
-            recognition.onerror = (event) => {
-                if (event.error !== 'no-speech') {
-                    console.error('Speech recognition error:', event.error);
-                }
-            };
-
-            recognition.onend = () => {
-                if (document.getElementById('stopBtn').style.display !== 'none') {
-                    recognition.start();
-                }
-            };
-
-            recognition.start();
-        }
-
-        function updateProgress() {
-            const progress = (currentWordPointer / targetWords.length) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
-        }
-
-        function processTranscript(transcript) {
-            const spokenWords = transcript.split(/\s+/).filter(w => w.length > 0);
-            
-            spokenWords.forEach(spokenWord => {
-                const cleanSpoken = spokenWord.replace(/[^\w]/g, '');
-                if (cleanSpoken.length === 0) return;
-                if (currentWordPointer >= targetWords.length) return;
-
-                let bestMatch = -1;
-                let bestScore = 0;
-                const lookAheadWindow = 4;
-
-                for (let i = currentWordPointer; i < Math.min(currentWordPointer + lookAheadWindow, targetWords.length); i++) {
-                    if (wordStates[i] === 'pending') {
-                        const score = getSimilarityScore(cleanSpoken, targetWords[i]);
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestMatch = i;
-                        }
-                    }
-                }
-
-                const goodThreshold = 0.55;
-                
-                if (bestMatch !== -1 && bestScore >= goodThreshold) {
-                    markWord(bestMatch, true);
-                    currentWordPointer = bestMatch + 1;
-                } else {
-                    if (currentWordPointer < targetWords.length && wordStates[currentWordPointer] === 'pending') {
-                        markWord(currentWordPointer, false);
-                        currentWordPointer++;
-                    }
-                }
-            });
-        }
-
-        function markWord(index, isCorrect) {
-            if (wordStates[index] !== 'pending') return;
-
-            const element = document.getElementById(`word-${index}`);
-            if (!element) return;
-
-            wordStates[index] = isCorrect ? 'correct' : 'incorrect';
-            element.className = 'word ' + (isCorrect ? 'correct' : 'incorrect');
-            
-            if (isCorrect) {
-                correctCount++;
-            } else {
-                wrongWordsList.push(targetWords[index]);
-            }
-        }
-
-        function getSimilarityScore(spoken, target) {
-            if (spoken === target) return 1.0;
-            
-            const spokenBase = spoken.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
-            const targetBase = target.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
-            
-            if (spokenBase === targetBase) return 0.95;
-
-            if (spoken.length >= 3 && target.length >= 3) {
-                if (spoken.includes(target) || target.includes(spoken)) {
-                    return 0.75;
-                }
             }
 
-            const dist = levenshtein(spoken, target);
-            const maxLen = Math.max(spoken.length, target.length);
-            
-            let allowedErrors = 1;
-            if (maxLen > 4) allowedErrors = 2;
-            if (maxLen > 7) allowedErrors = 3;
-            if (maxLen > 10) allowedErrors = 4;
-            
-            if (dist <= allowedErrors) {
-                return Math.max(0.55, 1 - (dist / maxLen));
+            if (bestMatch !== -1 && bestScore >= 0.55) {
+                markWord(bestMatch, true);
+                currentWordPointer = bestMatch + 1;
+            } else if (wordStates[currentWordPointer] === 'pending') {
+                markWord(currentWordPointer, false);
+                currentWordPointer++;
             }
-            
-            return 1 - (dist / maxLen);
+        });
+    }
+
+    function markWord(index, isCorrect) {
+        const element = document.getElementById(`word-${index}`);
+        if(!element) return;
+        wordStates[index] = isCorrect ? 'correct' : 'incorrect';
+        element.className = 'word ' + (isCorrect ? 'correct' : 'incorrect');
+        if (isCorrect) correctCount++;
+        else wrongWordsList.push(targetWords[index]);
+    }
+
+    function updateProgress() {
+        const progress = (currentWordPointer / targetWords.length) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    function stopSession() {
+        if (recognition) { 
+            recognition.stop(); 
+            recognition.onend = null; 
+        }
+        
+        document.getElementById('readingArea').style.display = 'none';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('micIndicator').classList.remove('active');
+        document.getElementById('progressBar').style.display = 'none';
+
+        // Remove duplicates from wrong words
+        wrongWordsList = [...new Set(wrongWordsList)];
+        
+        const accuracy = Math.round((correctCount / targetWords.length) * 100);
+
+        if (wrongWordsList.length > 0) {
+            // Start warmup practice
+            startWarmupPractice();
+        } else {
+            // No mistakes - show results
+            showFinalResults(accuracy, "Perfect! All words correct!");
+        }
+    }
+/******************
+     * ENHANCED WARMUP PRACTICE
+     ******************/
+    function startWarmupPractice() {
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('readingArea').style.display = 'none';
+        document.getElementById('warmupContainer').style.display = 'block';
+        
+        warmupWords = [...wrongWordsList];
+        currentWarmupIndex = 0;
+        readingPracticeMistakes = [];
+        
+        // Introductory Voice Instruction
+        const intro = new SpeechSynthesisUtterance("Great effort on the reading! Now, let's practice the words you missed to help you improve.");
+        intro.lang = 'en-IN';
+        intro.onend = () => {
+            setTimeout(showWarmupWord, 500);
+        };
+        synth.speak(intro);
+    }
+
+    function showWarmupWord() {
+        if (currentWarmupIndex >= warmupWords.length) {
+            completeWarmupPractice();
+            return;
         }
 
-        function stopSession() {
-            if (recognition) {
-                recognition.stop();
-                recognition.onend = null;
-            }
+        const word = warmupWords[currentWarmupIndex];
+        const display = document.getElementById('currentWordDisplay');
+        const status = document.getElementById('warmupStatus');
+        
+        // Reset Visuals
+        display.innerText = word.toUpperCase();
+        display.style.transform = "scale(1)";
+        display.style.opacity = "1";
+        display.style.color = ""; // Resets to gradient
+        
+        document.getElementById('warmupProgress').innerText = `Word ${currentWarmupIndex + 1} of ${warmupWords.length}`;
+        status.innerHTML = "👂 <strong>Listen...</strong>";
+        document.getElementById('speakBtn').disabled = true;
 
-            document.getElementById('readingArea').style.display = 'none';
-            document.getElementById('controls').style.display = 'none';
-            document.getElementById('status').style.display = 'none';
-            document.getElementById('micIndicator').classList.remove('active');
-            document.getElementById('progressBar').style.display = 'none';
-            
-            const total = targetWords.length;
-            const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-            
-            // Get unique wrong words
-            const uniqueWrongWords = [...new Set(wrongWordsList)];
-            wrongWordsList = uniqueWrongWords;
-            
-            // Show results for 2 seconds, then start warmup if there are wrong words
-            if (wrongWordsList.length > 0) {
-                document.getElementById('results').style.display = 'block';
-                document.getElementById('accDisplay').innerText = accuracy + "%";
-                
-                let icon = '🎉';
-                if (accuracy >= 95) icon = '🏆';
-                else if (accuracy >= 85) icon = '🌟';
-                else if (accuracy >= 75) icon = '👍';
-                else if (accuracy >= 60) icon = '👏';
-                else if (accuracy >= 40) icon = '💪';
-                else icon = '📖';
-                document.getElementById('resultIcon').innerText = icon;
-                
-                const remarks = getRemarks(accuracy);
-                document.getElementById('remDisplay').innerText = remarks;
-                
-                const finalMsg = new SpeechSynthesisUtterance(remarks);
-                finalMsg.lang = 'en-IN';
-                window.speechSynthesis.speak(finalMsg);
-                
-                // Save wrong words to database
-                saveWrongWords();
-                
-                // Wait for voice to finish + 2 seconds, then start warmup
-                finalMsg.onend = () => {
-                    setTimeout(() => {
-                        startWarmupPractice();
-                    }, 2000);
-                };
-            } else {
-                // No wrong words, just show results
-                document.getElementById('results').style.display = 'block';
-                document.getElementById('accDisplay').innerText = accuracy + "%";
-                document.getElementById('resultIcon').innerText = '🎉';
-                document.getElementById('remDisplay').innerText = "Perfect! All words correct!";
-                
-                const finalMsg = new SpeechSynthesisUtterance("Perfect! All words correct!");
-                finalMsg.lang = 'en-IN';
-                window.speechSynthesis.speak(finalMsg);
-            }
-        }
-
-        function startWarmupPractice() {
-            // Hide results, show warmup
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('warmupContainer').style.display = 'block';
-            isWarmupActive = true;
-            
-            // Initialize warmup
-            warmupWords = [...wrongWordsList];
-            currentWarmupIndex = 0;
-            readingPracticeWords = [];
-            
-            // Start with first word
-            loadCurrentWarmupWord();
-        }
-
-        function loadCurrentWarmupWord() {
-            if (currentWarmupIndex >= warmupWords.length) {
-                completeWarmupPractice();
-                return;
-            }
-
-            const word = warmupWords[currentWarmupIndex];
-            
-            // Reset attempts for this word
-            warmupAttempts = 0;
-            
-            // Update UI
-            document.getElementById('currentWordDisplay').innerText = word.toUpperCase();
-            document.getElementById('currentWordDisplay').style.color = '';
-            document.getElementById('warmupProgress').innerText = `Word ${currentWarmupIndex + 1} of ${warmupWords.length}`;
-            document.getElementById('warmupStatus').innerText = 'Listen carefully...';
-            document.getElementById('speakBtn').style.display = 'inline-block';
-            document.getElementById('nextBtn').style.display = 'none';
-            
-            // Speak the word automatically after a short delay
+        // Teacher's pronunciation
+        const utter = new SpeechSynthesisUtterance(word);
+        utter.lang = 'en-IN';
+        utter.rate = 0.8; // Slightly slower for clarity
+        utter.onend = () => {
             setTimeout(() => {
-                const msg = new SpeechSynthesisUtterance(word);
-                msg.lang = 'en-IN';
-                msg.rate = 0.75;
-                msg.onend = () => {
-                    setTimeout(() => {
-                        document.getElementById('warmupStatus').innerText = 'Now repeat the word! Click SPEAK when ready.';
-                    }, 300);
-                };
-                window.speechSynthesis.speak(msg);
-            }, 500);
-        }
+                status.innerHTML = "🎤 <strong>Your turn! Click SPEAK and repeat the word.</strong>";
+                document.getElementById('speakBtn').disabled = false;
+                // Subtle pulse to call attention to the button
+                document.getElementById('speakBtn').style.animation = "bounce 1s infinite";
+            }, 400);
+        };
+        synth.speak(utter);
+    }
 
-        function startWarmupListening() {
-            if (!isWarmupActive) return;
-            
-            document.getElementById('speakBtn').style.display = 'none';
-            document.getElementById('warmupStatus').innerText = '🎤 Listening... Speak now!';
-            document.getElementById('micIndicator').classList.add('active');
+    function startWarmupListening() {
+        if (warmupRecognition) { try { warmupRecognition.stop(); } catch(e) {} }
+        clearTimeout(silenceTimer);
 
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            warmupRecognition = new SpeechRecognition();
-            warmupRecognition.continuous = false;
-            warmupRecognition.interimResults = false;
-            warmupRecognition.lang = 'en-IN';
-            warmupRecognition.maxAlternatives = 3;
+        document.getElementById('speakBtn').style.animation = "none";
+        
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        warmupRecognition = new SpeechRecognition();
+        warmupRecognition.lang = 'en-IN';
+        
+        document.getElementById('micIndicator').classList.add('active');
+        document.getElementById('warmupStatus').innerHTML = "🎙️ <strong>Listening...</strong>";
+        document.getElementById('speakBtn').disabled = true;
 
-            // Set timeout for no speech
-            const timeout = setTimeout(() => {
-                if (warmupRecognition) {
-                    warmupRecognition.stop();
-                    handleNoSpeech();
-                }
-            }, 5000);
+        // Auto-stop if no sound heard in 5 seconds
+        silenceTimer = setTimeout(() => {
+            if (warmupRecognition) {
+                warmupRecognition.stop();
+                handleNoSpeech();
+            }
+        }, 5000);
 
-            warmupRecognition.onresult = (event) => {
-                clearTimeout(timeout);
-                document.getElementById('micIndicator').classList.remove('active');
-                
-                const spoken = event.results[0][0].transcript.trim().toLowerCase().replace(/[^\w]/g, '');
-                const target = warmupWords[currentWarmupIndex].toLowerCase();
-                
-                checkWarmupPronunciation(spoken, target);
-            };
-
-            warmupRecognition.onerror = (event) => {
-                clearTimeout(timeout);
-                document.getElementById('micIndicator').classList.remove('active');
-                document.getElementById('warmupStatus').innerText = 'Error listening. Try again!';
-                document.getElementById('speakBtn').style.display = 'inline-block';
-            };
-
-            warmupRecognition.onend = () => {
-                clearTimeout(timeout);
-            };
-
-            warmupRecognition.start();
-        }
-
-        function handleNoSpeech() {
+        warmupRecognition.onresult = (event) => {
+            clearTimeout(silenceTimer);
             document.getElementById('micIndicator').classList.remove('active');
-            document.getElementById('warmupStatus').innerText = 'No speech detected. Try again!';
-            document.getElementById('speakBtn').style.display = 'inline-block';
-        }
+            const spoken = event.results[0][0].transcript.toLowerCase().trim().replace(/[^\w]/g, '');
+            handleWarmupResult(spoken);
+        };
 
-        function checkWarmupPronunciation(spoken, target) {
-            const similarity = getSimilarityScore(spoken, target);
-            const isCorrect = similarity >= 0.65;
+        warmupRecognition.onerror = () => {
+            clearTimeout(silenceTimer);
+            document.getElementById('micIndicator').classList.remove('active');
+            document.getElementById('speakBtn').disabled = false;
+        };
+
+        warmupRecognition.start();
+    }
+
+    function handleNoSpeech() {
+        document.getElementById('micIndicator').classList.remove('active');
+        document.getElementById('warmupStatus').textContent = "⚠️ I didn't hear that. Try again!";
+        document.getElementById('speakBtn').disabled = false;
+        const msg = new SpeechSynthesisUtterance("I didn't hear anything. Please click speak and try again.");
+        msg.lang = 'en-IN';
+        synth.speak(msg);
+    }
+
+    function handleWarmupResult(spoken) {
+        const target = warmupWords[currentWarmupIndex].toLowerCase();
+        const similarity = getSimilarityScore(spoken, target);
+        const isCorrect = similarity >= 0.70; // Slightly stricter for single word practice
+
+        const display = document.getElementById('currentWordDisplay');
+        const status = document.getElementById('warmupStatus');
+
+        if (isCorrect) {
+            display.style.color = '#10b981';
+            display.style.transform = "scale(1.1)";
+            status.innerHTML = "🌟 <strong>Perfect Correction!</strong>";
             
-            // Increment attempt count for this word
-            warmupAttempts++;
-
-            if (isCorrect) {
-                // CORRECT pronunciation
-                document.getElementById('warmupStatus').innerHTML = '✅ <strong>Perfect!</strong> Excellent pronunciation!';
-                document.getElementById('currentWordDisplay').style.color = '#10b981';
-                
-                // Play congratulation
+            const praise = new SpeechSynthesisUtterance("Excellent!");
+            praise.lang = 'en-IN';
+            praise.onend = () => {
                 setTimeout(() => {
-                    const praise = new SpeechSynthesisUtterance('Great job! Perfect!');
-                    praise.lang = 'en-IN';
-                    praise.onend = () => {
-                        setTimeout(() => {
-                            // Move to next word
-                            currentWarmupIndex++;
-                            loadCurrentWarmupWord();
-                        }, 1000);
-                    };
-                    window.speechSynthesis.speak(praise);
-                }, 300);
-                
-            } else if (warmupAttempts === 1) {
-                // First wrong attempt - give another chance
-                document.getElementById('warmupStatus').innerHTML = '❌ <strong>Not quite right.</strong> Listen carefully and try again...';
-                document.getElementById('currentWordDisplay').style.color = '#ef4444';
-                
-                // Speak the word again slowly
+                    currentWarmupIndex++;
+                    showWarmupWord();
+                }, 800);
+            };
+            synth.speak(praise);
+        } else {
+            // Store the word as a persistent mistake to show in dashboard later
+            readingPracticeMistakes.push(target);
+            display.style.color = '#ef4444';
+            status.innerHTML = "💪 <strong>Nice try! We'll keep practicing this one.</strong>";
+            
+            const encourage = new SpeechSynthesisUtterance("Good try! Let's move to the next one.");
+            encourage.lang = 'en-IN';
+            encourage.onend = () => {
                 setTimeout(() => {
-                    const repeatMsg = new SpeechSynthesisUtterance('Try again. ' + target);
-                    repeatMsg.lang = 'en-IN';
-                    repeatMsg.rate = 0.6;
-                    repeatMsg.onend = () => {
-                        setTimeout(() => {
-                            document.getElementById('currentWordDisplay').style.color = '';
-                            document.getElementById('speakBtn').style.display = 'inline-block';
-                            document.getElementById('warmupStatus').innerText = 'Second attempt. Speak now!';
-                        }, 300);
-                    };
-                    window.speechSynthesis.speak(repeatMsg);
-                }, 500);
-                
-            } else {
-                // Second wrong attempt - mark for reading_practice_mistakes
-                readingPracticeWords.push(target);
-                document.getElementById('warmupStatus').innerHTML = '💪 <strong>Keep practicing this word!</strong> It will be added to special practice.';
-                document.getElementById('currentWordDisplay').style.color = '#fb923c';
-                
-                // Play encouragement
-                setTimeout(() => {
-                    const encouragement = new SpeechSynthesisUtterance('Keep practicing! Moving to next word.');
-                    encouragement.lang = 'en-IN';
-                    encouragement.onend = () => {
-                        setTimeout(() => {
-                            currentWarmupIndex++;
-                            loadCurrentWarmupWord();
-                        }, 1000);
-                    };
-                    window.speechSynthesis.speak(encouragement);
-                }, 300);
+                    currentWarmupIndex++;
+                    showWarmupWord();
+                }, 1200);
+            };
+            synth.speak(encourage);
+        }
+    }
+
+    function completeWarmupPractice() {
+        const accuracy = Math.round((correctCount / targetWords.length) * 100);
+        
+        // Save the results of this warmup session
+        saveWarmupResults(accuracy);
+
+        let finalRemarks = "";
+        if (readingPracticeMistakes.length === 0) {
+            finalRemarks = "Incredible! You corrected every single mistake!";
+        } else {
+            finalRemarks = `Session complete! You've improved your reading accuracy.`;
+        }
+
+        showFinalResults(accuracy, finalRemarks);
+    }
+
+    function showFinalResults(accuracy, message) {
+        document.getElementById('warmupContainer').style.display = 'none';
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('accDisplay').innerText = accuracy + "%";
+        document.getElementById('remDisplay').innerText = message;
+        
+        let icon = accuracy >= 95 ? '🏆' : accuracy >= 85 ? '🌟' : accuracy >= 75 ? '👍' : '📖';
+        document.getElementById('resultIcon').innerText = icon;
+        
+        const finalMsg = new SpeechSynthesisUtterance(message);
+        finalMsg.lang = 'en-IN';
+        synth.speak(finalMsg);
+    }
+
+    /******************
+     * UTILITIES
+     ******************/
+    function getSimilarityScore(spoken, target) {
+        if (spoken === target) return 1.0;
+        
+        // Check root words
+        const spokenBase = spoken.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
+        const targetBase = target.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
+        if (spokenBase === targetBase) return 0.95;
+
+        // Substring match
+        if (spoken.length >= 3 && target.length >= 3) {
+            if (spoken.includes(target) || target.includes(spoken)) return 0.75;
+        }
+
+        // Levenshtein distance
+        const dist = levenshtein(spoken, target);
+        const maxLen = Math.max(spoken.length, target.length);
+        
+        let allowedErrors = 1;
+        if (maxLen > 4) allowedErrors = 2;
+        if (maxLen > 7) allowedErrors = 3;
+        
+        if (dist <= allowedErrors) return Math.max(0.65, 1 - (dist / maxLen));
+        return 1 - (dist / maxLen);
+    }
+
+    function levenshtein(a, b) {
+        const tmp = [];
+        for (let i = 0; i <= a.length; i++) tmp[i] = [i];
+        for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
+        for (let i = 1; i <= a.length; i++) {
+            for (let j = 1; j <= b.length; j++) {
+                tmp[i][j] = Math.min(
+                    tmp[i-1][j]+1, 
+                    tmp[i][j-1]+1, 
+                    tmp[i-1][j-1]+(a[i-1]===b[j-1]?0:1)
+                );
             }
         }
+        return tmp[a.length][b.length];
+    }
 
-        function completeWarmupPractice() {
-            isWarmupActive = false;
-            document.getElementById('warmupContainer').style.display = 'none';
-            document.getElementById('results').style.display = 'block';
-            
-            // Update results display
-            document.getElementById('resultIcon').innerText = '🎊';
-            document.getElementById('accDisplay').innerText = "PRACTICE COMPLETE!";
-            
-            let practiceSummary = `You practiced ${warmupWords.length} word${warmupWords.length > 1 ? 's' : ''}. `;
-            
-            const masteredWords = warmupWords.filter(word => !readingPracticeWords.includes(word));
-            
-            if (readingPracticeWords.length > 0) {
-                practiceSummary += `Mastered ${masteredWords.length} word${masteredWords.length > 1 ? 's' : ''}. `;
-                practiceSummary += `${readingPracticeWords.length} word${readingPracticeWords.length > 1 ? 's' : ''} need${readingPracticeWords.length > 1 ? '' : 's'} more practice.`;
-            } else {
-                practiceSummary += "All words mastered! Excellent work!";
-            }
-            
-            document.getElementById('remDisplay').innerText = practiceSummary;
-            
-            // Save warmup results to database
-            saveWarmupResults();
-            
-            // Play completion message
-            const completeMsg = new SpeechSynthesisUtterance(
-                readingPracticeWords.length === 0 ? 
-                'Excellent! All words mastered!' : 
-                'Good practice! Keep working on the difficult words.'
-            );
-            completeMsg.lang = 'en-IN';
-            window.speechSynthesis.speak(completeMsg);
-        }
+    /******************
+     * DATABASE SAVES
+     ******************/
+    
+    function saveWarmupResults(finalAccuracy) {
+        // 1. Save score to the Scores table
+        fetch('save_score.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                sid: sid,
+                hid: hid,
+                accuracy: finalAccuracy
+            })
+        }).catch(err => console.error('Score Save Failed'));
 
-        function moveToDashboard() {
-            window.location.href = 'student_dashboard.php';
-        }
-
-        function saveWrongWords() {
-            fetch('save_wrong_words.php', { 
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    sid: sid,
-                    hid: hid,
-                    wrong_words: wrongWordsList
-                })
-            }).catch(err => console.log('Save completed'));
-        }
-
-        function saveWarmupResults() {
-            // Calculate mastered words (words that were correct or only wrong once)
-            const masteredWords = warmupWords.filter(word => !readingPracticeWords.includes(word));
-            
-            fetch('save_warmup_results.php', { 
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    sid: sid,
-                    mastered_words: masteredWords,
-                    reading_practice_mistakes: readingPracticeWords
-                })
-            }).catch(err => console.log('Warmup results saved'));
-        }
-
-        function getRemarks(accuracy) {
-            if (accuracy >= 95) {
-                return "Outstanding! Perfect reading with excellent clarity!";
-            } else if (accuracy >= 85) {
-                return "Excellent work! You read very well!";
-            } else if (accuracy >= 75) {
-                return "Great job! Keep practicing to improve further!";
-            } else if (accuracy >= 60) {
-                return "Good effort! Practice more to read better!";
-            } else if (accuracy >= 40) {
-                return "Nice try! Keep practicing, you'll get better!";
-            } else {
-                return "Keep practicing! You can do better next time!";
-            }
-        }
-
-        function levenshtein(a, b) {
-            const tmp = [];
-            for (let i = 0; i <= a.length; i++) tmp[i] = [i];
-            for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
-            for (let i = 1; i <= a.length; i++) {
-                for (let j = 1; j <= b.length; j++) {
-                    tmp[i][j] = Math.min(
-                        tmp[i - 1][j] + 1,
-                        tmp[i][j - 1] + 1,
-                        tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
-                    );
-                }
-            }
-            return tmp[a.length][b.length];
-        }
+        // 2. Save remaining mistakes to the Warmup/Mistakes table
+        fetch('save_warmup.php', { 
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                sid: sid,
+                hid: hid,
+                reading_practice_mistakes: readingPracticeMistakes
+            })
+        })
+        .then(res => res.json())
+        .then(data => console.log('Mistakes updated:', data))
+        .catch(err => console.error('Warmup Save Failed'));
+    }
     </script>
 </body>
 </html>

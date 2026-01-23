@@ -1,21 +1,12 @@
 <?php
 session_start();
-
-// Database configuration - Using your local password
-$host = 'localhost';
-$db = 'speakread_db';
-$user = 'root';
-$pass = 'skdn1418';
+require_once '../config/db.php';
 
 // Set header for JSON response
 header('Content-Type: application/json');
 
 try {
-    // Connect to database
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Get POST data (JSON sent from reading_practice.php)
+    // Get POST data (JSON sent from reading_practice.php or homework.php)
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     
@@ -28,6 +19,7 @@ try {
     // Extract data
     $sid = (int)$data['sid'];
     $wrong_words = $data['wrong_words'];
+    $source = $data['source'] ?? 'homework'; // 'homework' or 'reading_practice'
     
     // If there are no wrong words, just return success
     if (empty($wrong_words)) {
@@ -35,23 +27,39 @@ try {
         exit;
     }
     
-    // Prepare statement to insert wrong words into Warmup table
-    $stmt = $pdo->prepare("INSERT INTO Warmup (SID, IncorrectWord) VALUES (?, ?)");
+    // Convert array to comma-separated string
+    $words_string = implode(',', array_map('trim', $wrong_words));
     
-    // Insert each wrong word
-    $inserted_count = 0;
-    foreach ($wrong_words as $word) {
-        if (!empty(trim($word))) {
-            $stmt->execute([$sid, trim($word)]);
-            $inserted_count++;
-        }
+    // Determine which column to update based on source
+    $column = ($source === 'homework') ? 'homework_mistakes' : 'reading_practice_mistakes';
+    
+    // Check if student already has a warmup record
+    $checkStmt = $pdo->prepare("SELECT WID, $column FROM Warmup WHERE SID = ?");
+    $checkStmt->execute([$sid]);
+    $existing = $checkStmt->fetch();
+    
+    if ($existing) {
+        // Append new mistakes to existing ones
+        $existing_words = $existing[$column] ? explode(',', $existing[$column]) : [];
+        $all_words = array_unique(array_merge($existing_words, $wrong_words));
+        $words_string = implode(',', array_map('trim', $all_words));
+        
+        // Update existing record
+        $updateStmt = $pdo->prepare("UPDATE Warmup SET $column = ? WHERE SID = ?");
+        $updateStmt->execute([$words_string, $sid]);
+        $message = 'Wrong words updated successfully';
+    } else {
+        // Insert new record
+        $insertStmt = $pdo->prepare("INSERT INTO Warmup (SID, $column) VALUES (?, ?)");
+        $insertStmt->execute([$sid, $words_string]);
+        $message = 'Wrong words saved successfully';
     }
     
     // Send success response
     echo json_encode([
         'success' => true, 
-        'message' => 'Wrong words saved successfully',
-        'words_saved' => $inserted_count
+        'message' => $message,
+        'words_saved' => count($wrong_words)
     ]);
     
 } catch (PDOException $e) {
@@ -60,7 +68,6 @@ try {
         'success' => false, 
         'message' => 'Database error: ' . $e->getMessage()
     ]);
-    
 } catch (Exception $e) {
     // General error
     echo json_encode([

@@ -5,7 +5,7 @@ session_start();
 $host = 'localhost'; 
 $db   = 'speakread_db'; 
 $user = 'root'; 
-$pass = 'skdn1418'; // Change this to your password
+$pass = '12345678'; // Change this to your password
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);

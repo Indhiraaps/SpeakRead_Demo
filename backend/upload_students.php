@@ -1,87 +1,79 @@
 <?php
 session_start();
+// Redirect if not a teacher
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'teacher') {
+    header("Location: ../frontend/login.html");
+    exit();
+}
+
 $host = 'localhost'; 
 $db = 'speakread_db'; 
 $user = 'root'; 
-$pass = 'skdn1418'; // Change this to your password
+$pass = '12345678'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $grade = $_POST['grade_name'];
+        $grade = trim($_POST['grade_name']);
         $teacher_id = $_SESSION['user_id'];
         
-        // Check if a file was actually provided
+        // 1. Check if the grade already exists for this teacher
+        $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM Students WHERE Grade = ? AND TID = ?");
+        $checkStmt->execute([$grade, $teacher_id]);
+        $exists = $checkStmt->fetchColumn();
+
+        // 2. If it doesn't exist, create a Placeholder to "register" the class
+        if ($exists == 0) {
+            $placeholder_email = "class_init_" . time() . "_" . $teacher_id . "@speakread.com";
+            $placeholder_pass = hash('sha256', 'nopassword');
+            $initStmt = $pdo->prepare("INSERT INTO Students (Name, Email, Password, Grade, TID) VALUES (?, ?, ?, ?, ?)");
+            $initStmt->execute(['System Placeholder', $placeholder_email, $placeholder_pass, $grade, $teacher_id]);
+        }
+
+        // 3. Handle CSV File Upload if provided
         if (isset($_FILES["student_excel"]) && $_FILES["student_excel"]["size"] > 0) {
             $file = $_FILES["student_excel"]["tmp_name"];
-            $fileName = $_FILES["student_excel"]["name"];
-            $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+            $ext = pathinfo($_FILES["student_excel"]["name"], PATHINFO_EXTENSION);
 
-            // Handle CSV files
             if ($ext == "csv") {
                 if (($handle = fopen($file, "r")) !== FALSE) {
                     fgetcsv($handle, 1000, ","); // Skip header row
                     
-                    // FIX: Use UPPERCASE column names to match database
                     $stmt = $pdo->prepare("INSERT INTO Students (Name, Email, Password, Grade, TID) VALUES (?, ?, ?, ?, ?)");
                     
                     $success_count = 0;
                     $error_count = 0;
                     
                     while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                        if (empty($data[0])) continue; // Skip empty rows
+                        if (empty($data[0])) continue; 
                         
                         $name = trim($data[0]);
                         $email = trim($data[1]);
-                        $password = trim($data[2]); // Password from CSV
-                        
-                        // FIX: Hash the password before storing (match login behavior)
+                        $password = trim($data[2]); 
                         $hashed_password = hash('sha256', $password);
                         
                         try {
                             $stmt->execute([$name, $email, $hashed_password, $grade, $teacher_id]);
                             $success_count++;
                         } catch (PDOException $e) {
-                            // Skip duplicate emails
-                            if ($e->getCode() == 23000) {
-                                $error_count++;
-                                continue;
-                            } else {
-                                throw $e;
-                            }
+                            if ($e->getCode() == 23000) { $error_count++; } 
+                            else { throw $e; }
                         }
                     }
                     fclose($handle);
                     
-                    $message = "$success_count student(s) added successfully!";
-                    if ($error_count > 0) {
-                        $message .= " ($error_count duplicate emails skipped)";
-                    }
-                    echo "<script>alert('$message'); window.location.href='teacher_dashboard.php';</script>";
+                    $msg = "Class updated: $success_count students added.";
+                    if($error_count > 0) $msg .= " ($error_count duplicates skipped).";
+                    echo "<script>alert('$msg'); window.location.href='teacher_dashboard.php';</script>";
                 }
             } else {
-                // Excel files (.xlsx/.xls) require additional library
-                echo "<script>alert('Please use CSV format. To convert Excel to CSV: Open file > Save As > CSV (Comma delimited)'); window.history.back();</script>";
+                echo "<script>alert('Please use CSV format.'); window.history.back();</script>";
             }
         } else {
-            // No file uploaded - create class without students
-            // Check if this grade already exists for this teacher
-            $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM Students WHERE Grade = ? AND TID = ?");
-            $checkStmt->execute([$grade, $teacher_id]);
-            $exists = $checkStmt->fetchColumn();
-            
-            if ($exists > 0) {
-                echo "<script>alert('This class already exists!'); window.location.href='teacher_dashboard.php';</script>";
-            } else {
-                // FIX: Use UPPERCASE column names and hash the placeholder password
-                $placeholder_password = hash('sha256', 'nopassword');
-                $stmt = $pdo->prepare("INSERT INTO Students (Name, Email, Password, Grade, TID) VALUES (?, ?, ?, ?, ?)");
-                $stmt->execute(['System Placeholder', 'class_init_' . time() . '@speakread.com', $placeholder_password, $grade, $teacher_id]);
-                
-                echo "<script>alert('Class created successfully! You can now add students individually.'); window.location.href='teacher_dashboard.php';</script>";
-            }
+            // No file, just the placeholder was created
+            echo "<script>alert('New class created: $grade'); window.location.href='teacher_dashboard.php';</script>";
         }
         
     } catch (PDOException $e) {

@@ -18,28 +18,42 @@ try {
     $hwStmt->execute([$grade, $today]);
     $homework = $hwStmt->fetch();
 
-    // 2. Count Warmup Words (incorrect words to practice)
-    $warmupStmt = $pdo->prepare("SELECT COUNT(DISTINCT IncorrectWord) as word_count FROM Warmup WHERE SID = ?");
+    // 2. Count Warmup Words from both columns
+    $warmupStmt = $pdo->prepare("SELECT homework_mistakes, reading_practice_mistakes FROM Warmup WHERE SID = ?");
     $warmupStmt->execute([$student_id]);
     $warmupData = $warmupStmt->fetch();
-    $warmupCount = $warmupData['word_count'] ?? 0;
-
-    // 3. Get Recent Warmup Words (for display)
-    $recentWordsStmt = $pdo->prepare("SELECT DISTINCT IncorrectWord FROM Warmup WHERE SID = ? LIMIT 5");
-    $recentWordsStmt->execute([$student_id]);
-    $recentWords = $recentWordsStmt->fetchAll();
-
-    // 4. Calculate Accuracy from homework reading sessions
-    // For now, set to 0 until we create the reading results tracking
-    $accuracy = 0;
-    $total_sessions = 0;
-    $total_words_read = 0;
     
-    // TODO: Later we'll create a ReadingResults table to track:
-    // - Session date
-    // - Total words in paragraph
-    // - Correct words read
-    // - Accuracy percentage per session
+    $warmupWords = [];
+    if ($warmupData) {
+        if (!empty($warmupData['homework_mistakes'])) {
+            $warmupWords = array_merge($warmupWords, explode(',', $warmupData['homework_mistakes']));
+        }
+        if (!empty($warmupData['reading_practice_mistakes'])) {
+            $warmupWords = array_merge($warmupWords, explode(',', $warmupData['reading_practice_mistakes']));
+        }
+        $warmupWords = array_unique(array_filter(array_map('trim', $warmupWords)));
+    }
+    $warmupCount = count($warmupWords);
+    
+    // Get first 5 words for display
+    $recentWords = array_slice($warmupWords, 0, 5);
+
+    // 3. Calculate Stats from Scores table
+    $statsStmt = $pdo->prepare("
+        SELECT 
+            COUNT(*) as total_sessions,
+            AVG(Accuracy) as avg_accuracy
+        FROM Scores 
+        WHERE SID = ?
+    ");
+    $statsStmt->execute([$student_id]);
+    $stats = $statsStmt->fetch();
+    
+    $total_sessions = $stats['total_sessions'] ?? 0;
+    $accuracy = $total_sessions > 0 ? round($stats['avg_accuracy']) : 0;
+    
+    // Calculate total words read (estimate based on sessions)
+    $total_words_read = $total_sessions * 50; // Assuming ~50 words per session
 
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
@@ -54,11 +68,7 @@ try {
     <title>My Dashboard | SpeakRead</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -108,10 +118,6 @@ try {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .welcome {
-            flex: 1;
-        }
-
         .welcome h1 {
             font-size: 28px;
             font-weight: 800;
@@ -124,27 +130,6 @@ try {
         .welcome p {
             color: #64748b;
             font-size: 14px;
-        }
-
-        .streak-badge {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
-        }
-
-        .streak-badge .number {
-            font-size: 36px;
-            font-weight: 800;
-            display: block;
-        }
-
-        .streak-badge .label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .dashboard-grid {
@@ -191,17 +176,9 @@ try {
             background: linear-gradient(90deg, #667eea, #764ba2);
         }
 
-        .card.homework::before {
-            background: linear-gradient(90deg, #10b981, #059669);
-        }
-
-        .card.warmup::before {
-            background: linear-gradient(90deg, #f59e0b, #d97706);
-        }
-
-        .card.accuracy::before {
-            background: linear-gradient(90deg, #3b82f6, #2563eb);
-        }
+        .card.homework::before { background: linear-gradient(90deg, #10b981, #059669); }
+        .card.warmup::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .card.accuracy::before { background: linear-gradient(90deg, #3b82f6, #2563eb); }
 
         .card-icon {
             width: 50px;
@@ -215,27 +192,15 @@ try {
             box-shadow: 0 6px 16px rgba(0,0,0,0.1);
         }
 
-        .homework .card-icon {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-
-        .warmup .card-icon {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-
-        .accuracy .card-icon {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-        }
+        .homework .card-icon { background: linear-gradient(135deg, #10b981, #059669); }
+        .warmup .card-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .accuracy .card-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
 
         .card h2 {
             font-size: 18px;
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 12px;
-        }
-
-        .card-content {
-            margin-bottom: 18px;
         }
 
         .status-badge {
@@ -249,15 +214,8 @@ try {
             margin-bottom: 15px;
         }
 
-        .status-available {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-none {
-            background: #f1f5f9;
-            color: #64748b;
-        }
+        .status-available { background: #dcfce7; color: #166534; }
+        .status-none { background: #f1f5f9; color: #64748b; }
 
         .hw-topic {
             font-size: 16px;
@@ -289,17 +247,6 @@ try {
             letter-spacing: 0.5px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
-        }
-
         .btn-success {
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
@@ -322,15 +269,22 @@ try {
             box-shadow: 0 12px 30px rgba(245, 158, 11, 0.5);
         }
 
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+        }
+
         .btn-disabled {
             background: #e2e8f0;
             color: #94a3b8;
             cursor: not-allowed;
             box-shadow: none;
-        }
-
-        .btn-disabled:hover {
-            transform: none;
         }
 
         .word-list {
@@ -393,9 +347,7 @@ try {
             border-bottom: 1px solid #f1f5f9;
         }
 
-        .stat-row:last-child {
-            border-bottom: none;
-        }
+        .stat-row:last-child { border-bottom: none; }
 
         .stat-label {
             color: #64748b;
@@ -430,25 +382,13 @@ try {
         }
 
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                text-align: center;
-                gap: 20px;
-            }
-
-            .welcome h1 {
-                font-size: 24px;
-            }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .welcome h1 { font-size: 24px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header Section -->
         <div class="header">
             <div class="welcome">
                 <h1>Welcome back, <?= htmlspecialchars($student_name) ?>! 👋</h1>
@@ -456,7 +396,6 @@ try {
             </div>
         </div>
 
-        <!-- Dashboard Grid -->
         <div class="dashboard-grid">
             <!-- Homework Card -->
             <div class="card homework">
@@ -469,7 +408,7 @@ try {
                         <div class="hw-preview"><?= htmlspecialchars(substr($homework['H_Para'], 0, 100)) ?>...</div>
                     <?php else: ?>
                         <span class="status-badge status-none">No Task Today</span>
-                        <p style="color: #64748b; margin-top: 15px;">Your teacher hasn't assigned any homework for today. Check back later!</p>
+                        <p style="color: #64748b; margin-top: 15px;">Your teacher hasn't assigned any homework for today.</p>
                     <?php endif; ?>
                 </div>
                 <?php if ($homework): ?>
@@ -491,7 +430,7 @@ try {
                         <p style="color: #64748b; margin: 15px 0;">Practice these words to improve your reading:</p>
                         <div class="word-list">
                             <?php foreach ($recentWords as $word): ?>
-                                <span class="word-tag"><?= htmlspecialchars($word['IncorrectWord']) ?></span>
+                                <span class="word-tag"><?= htmlspecialchars($word) ?></span>
                             <?php endforeach; ?>
                             <?php if ($warmupCount > 5): ?>
                                 <span class="word-tag">+<?= $warmupCount - 5 ?> more</span>
@@ -499,11 +438,11 @@ try {
                         </div>
                     <?php else: ?>
                         <span class="status-badge status-none">All Clear!</span>
-                        <p style="color: #64748b; margin-top: 15px;">Great job! You have no words to practice right now. Keep reading to maintain your skills!</p>
+                        <p style="color: #64748b; margin-top: 15px;">Great job! You have no words to practice right now.</p>
                     <?php endif; ?>
                 </div>
                 <?php if ($warmupCount > 0): ?>
-                    <a href="warmup_session.php" class="btn btn-warning">Start Warmup →</a>
+                    <a href="warmup_practice.php" class="btn btn-warning">Start Warmup →</a>
                 <?php else: ?>
                     <button class="btn btn-disabled" disabled>No Practice Needed</button>
                 <?php endif; ?>
@@ -543,7 +482,7 @@ try {
                         <span class="stat-value"><?= number_format($total_words_read) ?></span>
                     </div>
                 </div>
-                <a href="view_progress.php" class="btn btn-primary">View Details →</a>
+                <a href="#" class="btn btn-primary">View Details →</a>
             </div>
         </div>
     </div>

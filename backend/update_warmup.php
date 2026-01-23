@@ -2,48 +2,69 @@
 session_start();
 require_once '../config/db.php';
 
-// Set header for JSON response
 header('Content-Type: application/json');
 
 try {
-    // Get POST data
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     
-    // Validate required data
     if (!isset($data['sid']) || !isset($data['words_to_keep']) || !isset($data['all_practiced_words'])) {
         echo json_encode(['success' => false, 'message' => 'Missing required data']);
         exit;
     }
     
     $sid = (int)$data['sid'];
-    $wordsToKeep = $data['words_to_keep']; // Words that were wrong even after 2 attempts
-    $allPracticedWords = $data['all_practiced_words']; // All words that were practiced
+    $wordsToKeep = $data['words_to_keep'];
+    $allPracticedWords = $data['all_practiced_words'];
     
-    // Step 1: Delete all practiced words from Warmup table
-    if (!empty($allPracticedWords)) {
-        $placeholders = str_repeat('?,', count($allPracticedWords) - 1) . '?';
-        $deleteStmt = $pdo->prepare("DELETE FROM Warmup WHERE SID = ? AND IncorrectWord IN ($placeholders)");
-        $params = array_merge([$sid], $allPracticedWords);
-        $deleteStmt->execute($params);
+    // Get current warmup data
+    $selectStmt = $pdo->prepare("SELECT homework_mistakes, reading_practice_mistakes FROM Warmup WHERE SID = ?");
+    $selectStmt->execute([$sid]);
+    $current = $selectStmt->fetch();
+    
+    if (!$current) {
+        echo json_encode(['success' => true, 'message' => 'No warmup data found']);
+        exit;
     }
     
-    // Step 2: Re-insert only the words that need more practice (wrong after 2 attempts)
-    if (!empty($wordsToKeep)) {
-        $insertStmt = $pdo->prepare("INSERT INTO Warmup (SID, IncorrectWord) VALUES (?, ?)");
-        foreach ($wordsToKeep as $word) {
-            if (!empty(trim($word))) {
-                $insertStmt->execute([$sid, trim($word)]);
-            }
-        }
+    // Combine all existing mistakes
+    $allMistakes = [];
+    if (!empty($current['homework_mistakes'])) {
+        $allMistakes = array_merge($allMistakes, explode(',', $current['homework_mistakes']));
+    }
+    if (!empty($current['reading_practice_mistakes'])) {
+        $allMistakes = array_merge($allMistakes, explode(',', $current['reading_practice_mistakes']));
+    }
+    $allMistakes = array_map('trim', $allMistakes);
+    
+    // Remove all practiced words
+    $allPracticedWords = array_map('trim', $allPracticedWords);
+    $remainingWords = array_diff($allMistakes, $allPracticedWords);
+    
+    // Add back words that need more practice
+    $wordsToKeep = array_map('trim', $wordsToKeep);
+    $finalWords = array_unique(array_merge($remainingWords, $wordsToKeep));
+    $finalWords = array_values(array_filter($finalWords)); // Remove empty values
+    
+    // Update database
+    if (empty($finalWords)) {
+        // No words left - delete the warmup record
+        $deleteStmt = $pdo->prepare("DELETE FROM Warmup WHERE SID = ?");
+        $deleteStmt->execute([$sid]);
+        $message = 'All words mastered! Warmup cleared.';
+    } else {
+        // Update with remaining words (store all in homework_mistakes column for simplicity)
+        $wordsString = implode(',', $finalWords);
+        $updateStmt = $pdo->prepare("UPDATE Warmup SET homework_mistakes = ?, reading_practice_mistakes = NULL WHERE SID = ?");
+        $updateStmt->execute([$wordsString, $sid]);
+        $message = 'Warmup updated successfully';
     }
     
-    // Send success response
     echo json_encode([
         'success' => true,
-        'message' => 'Warmup updated successfully',
-        'words_deleted' => count($allPracticedWords) - count($wordsToKeep),
-        'words_kept' => count($wordsToKeep)
+        'message' => $message,
+        'words_mastered' => count($allPracticedWords) - count($wordsToKeep),
+        'words_remaining' => count($finalWords)
     ]);
     
 } catch (PDOException $e) {

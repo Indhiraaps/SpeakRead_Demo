@@ -1,6 +1,6 @@
 <?php
 session_start();
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = 'skdn1418';
+$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = '12345678';
 $lid = $_GET['lid'] ?? 0;
 $sid = $_GET['sid'] ?? 0;
 
@@ -611,16 +611,28 @@ try {
         }
 
         function saveData(acc, correct, total) {
+            // Save wrong words
             fetch('wrong_words.php', { 
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     sid: sid,
-                    wrong_words: wrongWordsList
+                    wrong_words: wrongWordsList,
+                    source: 'reading_practice'
                 })
-            }).catch(err => console.log('Save completed'));
-        }
+            }).catch(err => console.log('Words saved'));
 
+            // Save score
+            fetch('save_score.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    sid: sid,
+                    hid: hid,
+                    accuracy: acc
+                })
+            }).catch(err => console.log('Score saved'));
+        }
         function levenshtein(a, b) {
             const tmp = [];
             for (let i = 0; i <= a.length; i++) tmp[i] = [i];
