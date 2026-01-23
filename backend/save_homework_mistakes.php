@@ -8,7 +8,6 @@ try {
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     
-    // Validate required data
     if (!isset($data['sid']) || !isset($data['wrong_words'])) {
         echo json_encode(['success' => false, 'message' => 'Missing required data']);
         exit;
@@ -17,19 +16,17 @@ try {
     $sid = (int)$data['sid'];
     $wrongWords = $data['wrong_words'];
     
-    // Validate student ID
     if ($sid <= 0) {
         echo json_encode(['success' => false, 'message' => 'Invalid student ID']);
         exit;
     }
     
-    // If no wrong words, return success
     if (empty($wrongWords)) {
         echo json_encode(['success' => true, 'message' => 'No mistakes to save', 'words_saved' => 0]);
         exit;
     }
     
-    // Remove duplicates and filter empty
+    // Remove duplicates
     $wrongWords = array_unique(array_filter(array_map('trim', $wrongWords)));
     
     if (empty($wrongWords)) {
@@ -37,16 +34,16 @@ try {
         exit;
     }
     
-    // Insert words as reading_practice type for THIS SPECIFIC STUDENT ONLY
+    // Insert words as homework type for THIS SPECIFIC STUDENT ONLY
     $insertStmt = $pdo->prepare("
         INSERT INTO Warmup (SID, IncorrectWord, WordType) 
-        VALUES (?, ?, 'reading_practice')
+        VALUES (?, ?, 'homework')
         ON DUPLICATE KEY UPDATE DateAdded = CURRENT_TIMESTAMP
     ");
     
     $inserted = 0;
     foreach ($wrongWords as $word) {
-        if (!empty($word) && strlen($word) > 2) { // Only save words longer than 2 characters
+        if (!empty($word) && strlen($word) > 2) {
             $insertStmt->execute([$sid, strtolower($word)]);
             $inserted++;
         }
@@ -54,7 +51,7 @@ try {
     
     echo json_encode([
         'success' => true,
-        'message' => 'Reading practice mistakes saved for student',
+        'message' => 'Homework mistakes saved for student',
         'words_saved' => $inserted,
         'student_id' => $sid
     ]);

@@ -5,18 +5,11 @@ $pass = '12345678'; // CHANGE THIS TO YOUR PASSWORD
 $dbname = 'speakread_db';
 
 try {
-    // Connect to MySQL server (no DB yet)
     $pdo = new PDO("mysql:host=$host", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Create DB
-    $pdo->exec("
-        CREATE DATABASE IF NOT EXISTS $dbname
-        CHARACTER SET utf8mb4
-        COLLATE utf8mb4_unicode_ci
-    ");
-
-    // Select DB
+    $pdo->exec("CREATE DATABASE IF NOT EXISTS $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
     $pdo->exec("USE $dbname");
 
     // Teachers Table
@@ -66,36 +59,36 @@ try {
         )
     ");
 
-    // Scores Table - For tracking reading session results
+    // Scores Table
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS Scores (
-            Score_ID INT AUTO_INCREMENT PRIMARY KEY,
+            ScoreID INT AUTO_INCREMENT PRIMARY KEY,
             SID INT NOT NULL,
-            HID INT NOT NULL,
+            HID INT,
             Accuracy DECIMAL(5,2) NOT NULL,
             DateCompleted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (SID) REFERENCES Students(SID) ON DELETE CASCADE,
-            FOREIGN KEY (HID) REFERENCES Homework(HID) ON DELETE CASCADE
+            FOREIGN KEY (HID) REFERENCES Homework(HID) ON DELETE SET NULL
         )
     ");
 
-    // Warmup Table - For tracking incorrect words
-    // Modified to match your actual schema
+    // CORRECTED Warmup Table - stores individual words per student per type
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS Warmup (
             WID INT AUTO_INCREMENT PRIMARY KEY,
-            SID INT,
-            homework_mistakes TEXT,
-            reading_practice_mistakes TEXT,
-            FOREIGN KEY (SID) REFERENCES Students(SID) ON DELETE CASCADE
+            SID INT NOT NULL,
+            IncorrectWord VARCHAR(100) NOT NULL,
+            WordType ENUM('reading_practice', 'homework') NOT NULL,
+            DateAdded TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (SID) REFERENCES Students(SID) ON DELETE CASCADE,
+            UNIQUE KEY unique_word_per_student_type (SID, IncorrectWord, WordType)
         )
     ");
 
-    echo "✓ Database & tables created successfully!<br>";
-    echo "✓ Schema matches your database structure<br>";
-    echo "<br>Next steps:<br>";
-    echo "1. Create a teacher account using the login page<br>";
-    echo "2. Teacher can then create classes and add students<br>";
+    echo "✅ Database & tables created successfully!<br>";
+    echo "✅ Warmup table configured for reading_practice and homework mistakes<br>";
+    echo "✅ Duplicate prevention with UNIQUE constraint per student per word type<br>";
+    echo "✅ Scores table created for tracking accuracy<br>";
 
 } catch (PDOException $e) {
     die("Setup failed: " . $e->getMessage());
