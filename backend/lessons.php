@@ -1,6 +1,6 @@
 <?php
 session_start();
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = '12345678';
+$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = 'skdn1418';
 $grade = $_GET['grade'] ?? 'Grade 3';
 
 try {
@@ -21,25 +21,28 @@ try {
         .sidebar { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background: white; border-right: 1px solid #e2e8f0; padding: 24px; box-sizing: border-box; }
         .content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); box-sizing: border-box; }
         .logo { color: #2563eb; font-weight: 800; font-size: 24px; text-decoration: none; display: block; margin-bottom: 40px; }
-        .back-link { color: #64748b; text-decoration: none; font-size: 14px; }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .main-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; margin-bottom: 24px; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #1e293b; }
         .btn { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
-        .long-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 24px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: white; display: flex; align-items: center; text-decoration: none; color: #334155; font-weight: 600; }
-        .long-card:hover { border-color: #2563eb; background: #f8fafc; transform: translateX(5px); }
-        .num-circle { width: 32px; height: 32px; background-color: #ebf2ff; color: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; margin-right: 15px; flex-shrink: 0; }
         
-        /* Modal Styles */
+        /* Modal Styles restored from original */
         .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
         .modal-content { background:white; padding:30px; border-radius:12px; width:400px; }
         input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; }
+
+        /* Professional Toggle Positioning */
+        .password-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+        .password-wrapper input { padding-right: 45px; margin: 0; }
+        .toggle-btn { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #94a3b8; display: flex; align-items: center; }
+        
+        .long-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 24px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: white; display: flex; align-items: center; text-decoration: none; color: #334155; font-weight: 600; }
+        .num-circle { width: 32px; height: 32px; background-color: #ebf2ff; color: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; margin-right: 15px; flex-shrink: 0; }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <a href="#" class="logo">SpeakRead</a>
-        <a href="teacher_dashboard.php" class="back-link">← Back to Dashboard</a>
+        <a href="teacher_dashboard.php" style="color: #64748b; text-decoration: none; font-size: 14px;">← Back to Dashboard</a>
     </div>
 
     <div class="content">
@@ -49,19 +52,7 @@ try {
         </div>
         
         <div class="main-card">
-            <div class="section-title">Weekly Homework Status</div>
-            <div style="display: flex; gap: 12px;">
-                <?php foreach(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?>
-                    <div style="background: #eff6ff; padding: 12px; border-radius: 8px; text-align: center; flex: 1; border: 1px solid #dbeafe;">
-                        <div style="font-size: 11px; font-weight: 800; color: #3b82f6; margin-bottom: 5px;"><?php echo $d; ?></div>
-                        <input type="checkbox" checked>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <div class="main-card">
-            <div class="section-title">Select a Lesson</div>
+            <div style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Select a Lesson</div>
             <?php foreach($lessons as $l): ?>
                 <a href="paragraphs.php?grade=<?php echo urlencode($grade); ?>&lesson=<?php echo urlencode($l['LessonName']); ?>" class="long-card">
                     <div class="num-circle"><?php echo htmlspecialchars($l['LessonNumber']); ?></div>
@@ -83,7 +74,12 @@ try {
                 <input type="hidden" name="grade" value="<?php echo htmlspecialchars($grade); ?>">
                 <input type="text" name="name" placeholder="Student Name" required>
                 <input type="email" name="email" placeholder="Email Address" required>
-                <input type="password" name="password" placeholder="Password" required>
+                <div class="password-wrapper" style="margin: 10px 0;">
+                    <input type="password" name="password" id="student_pass" placeholder="Password" required>
+                    <button type="button" class="toggle-btn" onclick="togglePassword('student_pass', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
                 <button type="submit" class="btn" style="width:100%;">Save Student</button>
             </form>
 
@@ -119,6 +115,18 @@ try {
                 bulkTab.style.color = '#000';
                 singleTab.style.borderBottom = 'none';
                 singleTab.style.color = '#64748b';
+            }
+        }
+
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('svg');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                input.type = "password";
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
             }
         }
     </script>
