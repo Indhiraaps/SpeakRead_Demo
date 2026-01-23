@@ -9,7 +9,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'teacher') {
 $host = 'localhost'; 
 $db = 'speakread_db'; 
 $user = 'root'; 
-$pass = '12345678'; 
+$pass = 'skdn1418'; 
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);

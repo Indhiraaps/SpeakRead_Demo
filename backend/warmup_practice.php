@@ -324,7 +324,7 @@ try {
 
     function handleResult(spoken) {
         const target = practiceWords[currentIndex].toLowerCase();
-        const isCorrect = getSimilarityScore(spoken, target) >= 0.65;
+        const isCorrect = getSimilarityScore(spoken, target) >= 0.45;
 
         if (isCorrect) {
             // CORRECT - will be DELETED from database

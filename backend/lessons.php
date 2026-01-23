@@ -1,6 +1,6 @@
 <?php
 session_start();
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = '12345678';
+$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = 'skdn1418';
 $grade = $_GET['grade'] ?? 'Grade 3';
 
 try {
@@ -23,9 +23,10 @@ try {
         .logo { color: #2563eb; font-weight: 800; font-size: 24px; text-decoration: none; display: block; margin-bottom: 40px; }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .main-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #1e293b; }
         .btn { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
         
-        /* Modal Styles restored from original */
+        /* Modal Styles */
         .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
         .modal-content { background:white; padding:30px; border-radius:12px; width:400px; }
         input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; }
@@ -50,9 +51,21 @@ try {
             <h1 style="font-size: 32px; font-weight: 800; margin: 0;">Management: <?php echo htmlspecialchars($grade); ?></h1>
             <button class="btn" onclick="document.getElementById('studentModal').style.display='flex'">+ Add Student</button>
         </div>
+
+        <div class="main-card">
+            <div class="section-title">Weekly Homework Status</div>
+            <div style="display: flex; gap: 12px;">
+                <?php foreach(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?>
+                    <div style="background: #eff6ff; padding: 12px; border-radius: 8px; text-align: center; flex: 1; border: 1px solid #dbeafe;">
+                        <div style="font-size: 11px; font-weight: 800; color: #3b82f6; margin-bottom: 5px;"><?php echo $d; ?></div>
+                        <input type="checkbox" checked>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
         
         <div class="main-card">
-            <div style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">Select a Lesson</div>
+            <div class="section-title">Select a Lesson</div>
             <?php foreach($lessons as $l): ?>
                 <a href="paragraphs.php?grade=<?php echo urlencode($grade); ?>&lesson=<?php echo urlencode($l['LessonName']); ?>" class="long-card">
                     <div class="num-circle"><?php echo htmlspecialchars($l['LessonNumber']); ?></div>

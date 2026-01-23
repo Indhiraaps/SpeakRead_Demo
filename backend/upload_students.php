@@ -3,7 +3,7 @@ session_start();
 $host = 'localhost'; 
 $db = 'speakread_db'; 
 $user = 'root'; 
-$pass = '12345678'; 
+$pass = 'skdn1418'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {

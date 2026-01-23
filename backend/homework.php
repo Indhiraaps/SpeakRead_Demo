@@ -332,7 +332,7 @@ if (!$hw) { die("Homework not found."); }
 
     const ignoreWords = new Set([
         'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
-        'of', 'with', 'by', 'as', 'is', 'are', 'was', 'were', 'be', 'been', 
+        'of', 'with', 'by', 'as', 'is', 'are', 'was', 'were', 
         'he', 'she', 'it', 'we', 'they', 'i', 'you', 'me', 'us', 'him', 'her'
     ]);
 
@@ -413,7 +413,7 @@ if (!$hw) { die("Homework not found."); }
                 }
             }
 
-            if (bestMatch !== -1 && bestScore >= 0.55) {
+            if (bestMatch !== -1 && bestScore >= 0.45) {
                 markWord(bestMatch, true);
                 currentWordPointer = bestMatch + 1;
             } else if (wordStates[currentWordPointer] === 'pending') {
