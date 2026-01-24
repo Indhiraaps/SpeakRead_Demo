@@ -1,7 +1,7 @@
 <?php
 $host = 'localhost';
 $user = 'root';
-$pass = 'skdn1418'; // CHANGE THIS TO YOUR PASSWORD
+$pass = '12345678'; // CHANGE THIS TO YOUR PASSWORD
 $dbname = 'speakread_db';
 
 try {
@@ -77,11 +77,11 @@ try {
         CREATE TABLE IF NOT EXISTS Warmup (
             WID INT AUTO_INCREMENT PRIMARY KEY,
             SID INT NOT NULL,
-            IncorrectWord VARCHAR(100) NOT NULL,
-            WordType ENUM('reading_practice', 'homework') NOT NULL,
-            DateAdded TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            homework_mistakes TEXT DEFAULT NULL,
+            reading_practice_mistakes TEXT DEFAULT NULL,
+            DateAdded TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (SID) REFERENCES Students(SID) ON DELETE CASCADE,
-            UNIQUE KEY unique_word_per_student_type (SID, IncorrectWord, WordType)
+            UNIQUE KEY unique_student (SID)
         )
     ");
 

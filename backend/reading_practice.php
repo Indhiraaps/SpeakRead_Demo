@@ -1,6 +1,7 @@
 <?php
 session_start();
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = 'skdn1418';
+require_once '../config/db.php';
+
 $lid = $_GET['lid'] ?? 0;
 $sid = $_GET['sid'] ?? 0;
 
@@ -10,154 +11,340 @@ if ($sid <= 0) {
 }
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
     $stmt = $pdo->prepare("SELECT Para FROM Lessons WHERE LID = ?");
     $stmt->execute([$lid]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $para = $result ? $result['Para'] : "No content found.";
-} catch (PDOException $e) { die("Error: " . $e->getMessage()); }
+} catch (PDOException $e) { 
+    die("Error: " . $e->getMessage()); 
+}
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Reading Practice - SpeakRead</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
         body { 
             font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            padding: 20px;
-        }
-        .main-card { 
-            background: rgba(255, 255, 255, 0.98); 
-            border-radius: 24px; 
-            padding: 30px 40px;
-            max-width: 900px; 
-            width: 90%; 
-            max-height: 90vh;
-            box-shadow: 0 30px 90px rgba(0,0,0,0.25);
-            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            width: 100vw;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
+        
+        /* FULL SCREEN CARD */
+        .main-card { 
+            background: rgba(255, 255, 255, 0.98); 
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            position: relative;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
         .header-icon {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 12px;
+            border-radius: 15px;
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 32px;
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
+        
         .status { 
-            font-size: 18px; 
+            font-size: 20px; 
             font-weight: 600; 
-            margin-bottom: 15px; 
-            color: #4a5568; 
+            margin-bottom: 20px; 
+            color: #4a5568;
+            text-align: center;
         }
+        
         .reading-text { 
-            font-size: 26px; 
-            line-height: 1.8; 
-            margin: 15px 0; 
-            padding: 25px 30px; 
+            font-size: 28px; 
+            line-height: 1.9; 
+            padding: 35px 40px; 
             background: #ffffff;
             border-radius: 20px; 
             text-align: left; 
             box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
-            min-height: 180px;
+            border: 2px solid rgba(102, 126, 234, 0.1);
             max-height: 40vh;
             overflow-y: auto;
-            border: 2px solid rgba(102, 126, 234, 0.1);
-            flex: 1;
         }
+        
         .word { 
             display: inline; 
             transition: all 0.3s;
             color: #2d3748; 
-            padding: 4px 6px; 
+            padding: 5px 7px; 
             border-radius: 6px;
         }
+        
         .word.correct { 
             color: #10b981 !important; 
             font-weight: 700;
             background: rgba(16, 185, 129, 0.1);
         } 
+        
         .word.incorrect { 
             color: #ef4444 !important; 
             font-weight: 700;
             background: rgba(239, 68, 68, 0.1);
         }
+        
+        /* LIVE TRANSCRIPT SECTION */
+        .transcript-section {
+            margin-top: 20px;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            min-height: 150px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .transcript-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .live-indicator {
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+            display: none;
+        }
+        
+        .live-indicator.active {
+            display: block;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .transcript-text {
+            font-size: 22px;
+            line-height: 1.8;
+            color: #1e293b;
+        }
+        
+        .transcript-word {
+            display: inline;
+            color: #1e293b;
+            font-weight: 500;
+        }
+        
+        /* LIVE SCORE DISPLAY */
+        .score-display {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .score-display.active {
+            display: flex;
+        }
+        
+        .score-item {
+            text-align: center;
+            color: white;
+        }
+        
+        .score-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 36px;
+            font-weight: 900;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        #controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
         .btn { 
-            padding: 14px 45px; 
+            padding: 16px 50px; 
             border: none; 
-            border-radius: 14px; 
+            border-radius: 15px; 
             cursor: pointer; 
             font-weight: 700; 
-            font-size: 17px; 
+            font-size: 18px; 
             margin: 10px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
         }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
         .btn-start { 
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
+        
         .btn-stop { 
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white; 
             display: none;
         }
-        .results { display: none; }
+        
+        .results { 
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
         .accuracy { 
-            font-size: 70px; 
+            font-size: 80px; 
             font-weight: 900; 
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin: 20px 0;
         }
+        
         .back-btn { 
             background: linear-gradient(135deg, #6b7280, #4b5563);
             color: white; 
             text-decoration: none; 
-            padding: 12px 35px; 
-            border-radius: 14px; 
+            padding: 14px 40px; 
+            border-radius: 15px; 
             font-weight: 700; 
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 20px;
         }
+        
         .mic-indicator {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
             background: #ef4444;
             border-radius: 50%;
             display: none;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 24px;
+            z-index: 1000;
+            animation: pulse 1.5s infinite;
         }
-        .mic-indicator.active { display: flex; }
+        
+        .mic-indicator.active { 
+            display: flex; 
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-card {
+                padding: 20px;
+            }
+            
+            .reading-text {
+                font-size: 24px;
+                padding: 25px;
+            }
+            
+            .transcript-text {
+                font-size: 18px;
+            }
+            
+            .btn {
+                padding: 14px 35px;
+                font-size: 16px;
+            }
+            
+            .score-value {
+                font-size: 28px;
+            }
+        }
     </style>
 </head>
 <body onload="welcomeVoice()">
     <div class="main-card">
-        <div class="header-icon">📚</div>
         <div class="mic-indicator" id="micIndicator">🎤</div>
         
-        <div id="status" class="status">Click START and read aloud</div>
+        <div class="header-section">
+            <div class="header-icon">📚</div>
+            <div id="status" class="status">Click START and read aloud</div>
+        </div>
+        
+        <!-- ORIGINAL PASSAGE (Static) -->
         <div id="readingArea" class="reading-text"></div>
+
+        <!-- LIVE TRANSCRIPT DISPLAY -->
+        <div class="transcript-section" id="transcriptSection" style="display: none;">
+            <div class="transcript-title">
+                <span class="live-indicator" id="liveIndicator"></span>
+                <span>🎤 What I'm Hearing:</span>
+            </div>
+            <div class="transcript-text" id="transcriptText">
+                <span style="color: #94a3b8; font-style: italic;">Listening...</span>
+            </div>
+        </div>
+
+        <!-- LIVE SCORE DISPLAY -->
+        <div class="score-display" id="scoreDisplay">
+            <div class="score-item">
+                <div class="score-label">Correct</div>
+                <div class="score-value" id="correctScore">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Total</div>
+                <div class="score-value" id="totalScore">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Accuracy</div>
+                <div class="score-value" id="liveAccuracy">0%</div>
+            </div>
+        </div>
 
         <div id="controls">
             <button id="startBtn" class="btn btn-start" onclick="startSession()">▶ START</button>
@@ -165,9 +352,9 @@ try {
         </div>
 
         <div id="results" class="results">
-            <div style="font-size: 60px; margin: 20px 0;">🎉</div>
+            <div style="font-size: 70px; margin: 20px 0;">🎉</div>
             <div class="accuracy" id="accDisplay">0%</div>
-            <div id="remDisplay" style="font-size: 20px; margin: 20px 0;"></div>
+            <div id="remDisplay" style="font-size: 22px; margin: 20px 0; color: #64748b;"></div>
             <a href="lessons.php" class="back-btn">← Back to Lessons</a>
         </div>
     </div>
@@ -183,6 +370,7 @@ try {
         let targetWords = []; 
         let wordStates = {};
         let currentWordPointer = 0;
+        let transcriptWords = []; // For live transcript display
 
         // Common words to ignore
         const ignoreWords = new Set([
@@ -192,6 +380,7 @@ try {
         ]);
 
         const readingArea = document.getElementById('readingArea');
+        const transcriptText = document.getElementById('transcriptText');
         const synth = window.speechSynthesis;
 
         // Setup paragraph
@@ -207,6 +396,9 @@ try {
             return `<span id="word-${idx}" class="word">${token}</span>`;
         }).join('');
 
+        // Update total score display
+        document.getElementById('totalScore').innerText = targetWords.length;
+
         function welcomeVoice() {
             const msg = new SpeechSynthesisUtterance("Click Start button and read aloud.");
             msg.lang = 'en-IN';
@@ -218,6 +410,9 @@ try {
             document.getElementById('stopBtn').style.display = 'inline-block';
             document.getElementById('status').innerText = "🎙️ Reading in progress...";
             document.getElementById('micIndicator').classList.add('active');
+            document.getElementById('liveIndicator').classList.add('active');
+            document.getElementById('transcriptSection').style.display = 'block';
+            document.getElementById('scoreDisplay').classList.add('active');
             initSpeech();
         }
 
@@ -231,12 +426,21 @@ try {
             let lastProcessedLength = 0;
 
             recognition.onresult = (event) => {
-                for (let i = lastProcessedLength; i < event.results.length; i++) {
+                // Show interim results in real-time
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
                     if (event.results[i].isFinal) {
                         const transcript = event.results[i][0].transcript.trim().toLowerCase();
                         processTranscript(transcript);
                         lastProcessedLength = i + 1;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
                     }
+                }
+                
+                // Update live transcript with interim results
+                if (interimTranscript) {
+                    updateTranscriptDisplay(interimTranscript, false);
                 }
             };
 
@@ -245,7 +449,42 @@ try {
                     recognition.start();
                 }
             };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+            };
+            
             recognition.start();
+        }
+
+        function updateTranscriptDisplay(text, isFinal) {
+            if (transcriptWords.length === 0) {
+                transcriptText.innerHTML = `<span class="transcript-word">${text}</span>`;
+            }
+        }
+
+        function addToTranscript(word, isCorrect) {
+            const wordSpan = document.createElement('span');
+            wordSpan.className = 'transcript-word';
+            wordSpan.innerText = word;
+            
+            transcriptWords.push(wordSpan);
+            transcriptText.innerHTML = '';
+            transcriptWords.forEach(span => {
+                transcriptText.appendChild(span);
+                transcriptText.appendChild(document.createTextNode(' '));
+            });
+            
+            // Auto-scroll to bottom
+            transcriptText.parentElement.scrollTop = transcriptText.parentElement.scrollHeight;
+        }
+
+        function updateLiveScore() {
+            document.getElementById('correctScore').innerText = correctCount;
+            const accuracy = targetWords.length > 0 
+                ? Math.round((correctCount / targetWords.length) * 100) 
+                : 0;
+            document.getElementById('liveAccuracy').innerText = accuracy + '%';
         }
 
         function processTranscript(transcript) {
@@ -270,11 +509,15 @@ try {
 
                 if (bestMatch !== -1 && bestScore >= 0.55) {
                     markWord(bestMatch, true);
+                    addToTranscript(targetWords[bestMatch], true);
                     currentWordPointer = bestMatch + 1;
                 } else if (wordStates[currentWordPointer] === 'pending') {
                     markWord(currentWordPointer, false);
+                    addToTranscript(cleanSpoken, false);
                     currentWordPointer++;
                 }
+                
+                updateLiveScore();
             });
         }
 
@@ -291,7 +534,6 @@ try {
                 correctCount++;
             } else {
                 const word = targetWords[index];
-                // Only save meaningful words (>2 chars and not common words)
                 if (word.length > 2 && !ignoreWords.has(word)) {
                     wrongWordsList.push(word);
                 }
@@ -321,6 +563,8 @@ try {
             }
 
             document.getElementById('readingArea').style.display = 'none';
+            document.getElementById('transcriptSection').style.display = 'none';
+            document.getElementById('scoreDisplay').style.display = 'none';
             document.getElementById('controls').style.display = 'none';
             document.getElementById('status').style.display = 'none';
             document.getElementById('micIndicator').classList.remove('active');
@@ -331,7 +575,7 @@ try {
             document.getElementById('accDisplay').innerText = accuracy + "%";
             document.getElementById('remDisplay').innerText = getRemarks(accuracy);
             
-            // Save wrong words for THIS SPECIFIC STUDENT
+            // Save wrong words
             saveWrongWords();
         }
 
@@ -344,14 +588,18 @@ try {
         }
 
         function saveWrongWords() {
-            // Remove duplicates
             const uniqueWords = [...new Set(wrongWordsList)];
+            
+            if (uniqueWords.length === 0) {
+                console.log('No wrong words to save');
+                return;
+            }
             
             fetch('save_warmup.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    sid: sid,  // THIS SPECIFIC STUDENT ONLY
+                    sid: sid,
                     wrong_words: uniqueWords
                 })
             })

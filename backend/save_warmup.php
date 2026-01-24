@@ -8,7 +8,6 @@ try {
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     
-    // Validate required data
     if (!isset($data['sid']) || !isset($data['wrong_words'])) {
         echo json_encode(['success' => false, 'message' => 'Missing required data']);
         exit;
@@ -17,19 +16,17 @@ try {
     $sid = (int)$data['sid'];
     $wrongWords = $data['wrong_words'];
     
-    // Validate student ID
     if ($sid <= 0) {
         echo json_encode(['success' => false, 'message' => 'Invalid student ID']);
         exit;
     }
     
-    // If no wrong words, return success
     if (empty($wrongWords)) {
         echo json_encode(['success' => true, 'message' => 'No mistakes to save', 'words_saved' => 0]);
         exit;
     }
     
-    // Remove duplicates and filter empty
+    // Remove duplicates
     $wrongWords = array_unique(array_filter(array_map('trim', $wrongWords)));
     
     if (empty($wrongWords)) {
@@ -37,27 +34,41 @@ try {
         exit;
     }
     
-    // Insert words as reading_practice type for THIS SPECIFIC STUDENT ONLY
-    $insertStmt = $pdo->prepare("
-        INSERT INTO Warmup (SID, IncorrectWord, WordType) 
-        VALUES (?, ?, 'reading_practice')
-        ON DUPLICATE KEY UPDATE DateAdded = CURRENT_TIMESTAMP
-    ");
+    // Check if student already has a warmup record
+    $checkStmt = $pdo->prepare("SELECT WID, reading_practice_mistakes FROM Warmup WHERE SID = ?");
+    $checkStmt->execute([$sid]);
+    $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
     
-    $inserted = 0;
-    foreach ($wrongWords as $word) {
-        if (!empty($word) && strlen($word) > 2) { // Only save words longer than 2 characters
-            $insertStmt->execute([$sid, strtolower($word)]);
-            $inserted++;
-        }
+    if ($existing) {
+        // UPDATE existing record
+        $currentWords = !empty($existing['reading_practice_mistakes']) ? 
+                        array_map('trim', explode(',', $existing['reading_practice_mistakes'])) : [];
+        
+        $merged = array_unique(array_merge($currentWords, $wrongWords));
+        $wordsString = implode(', ', $merged);
+        
+        $updateStmt = $pdo->prepare("UPDATE Warmup SET reading_practice_mistakes = ? WHERE SID = ?");
+        $updateStmt->execute([$wordsString, $sid]);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Reading mistakes updated',
+            'words_saved' => count($wrongWords),
+            'total_words' => count($merged)
+        ]);
+        
+    } else {
+        // INSERT new record
+        $wordsString = implode(', ', $wrongWords);
+        $insertStmt = $pdo->prepare("INSERT INTO Warmup (SID, reading_practice_mistakes) VALUES (?, ?)");
+        $insertStmt->execute([$sid, $wordsString]);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Reading mistakes saved',
+            'words_saved' => count($wrongWords)
+        ]);
     }
-    
-    echo json_encode([
-        'success' => true,
-        'message' => 'Reading practice mistakes saved for student',
-        'words_saved' => $inserted,
-        'student_id' => $sid
-    ]);
     
 } catch (PDOException $e) {
     echo json_encode([
