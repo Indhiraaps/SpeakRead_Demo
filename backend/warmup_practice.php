@@ -9,24 +9,24 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
 
 $student_id = $_SESSION['user_id'];
 
-// Fetch BOTH types of words from TEXT columns
+// Fetch words from BOTH columns separately
 try {
     $stmt = $pdo->prepare("SELECT homework_mistakes, reading_practice_mistakes FROM Warmup WHERE SID = ?");
     $stmt->execute([$student_id]);
-    $warmupData = $stmt->fetch();
+    $warmupData = $stmt->fetch(PDO::FETCH_ASSOC);
     
     $readingWords = [];
     $homeworkWords = [];
     
     if ($warmupData) {
-        // Parse reading_practice_mistakes
+        // Parse reading practice mistakes
         if (!empty($warmupData['reading_practice_mistakes'])) {
-            $readingWords = array_filter(array_map('trim', explode(',', $warmupData['reading_practice_mistakes'])));
+            $readingWords = array_unique(array_filter(array_map('trim', explode(',', $warmupData['reading_practice_mistakes']))));
         }
         
-        // Parse homework_mistakes
+        // Parse homework mistakes
         if (!empty($warmupData['homework_mistakes'])) {
-            $homeworkWords = array_filter(array_map('trim', explode(',', $warmupData['homework_mistakes'])));
+            $homeworkWords = array_unique(array_filter(array_map('trim', explode(',', $warmupData['homework_mistakes']))));
         }
     }
     
@@ -122,6 +122,7 @@ try {
             display: inline-block;
         }
         
+        /* Practice Mode */
         .practice-mode { display: none; }
         .practice-word { 
             font-size: 72px; 
@@ -144,6 +145,7 @@ try {
         }
         .btn-speak:disabled { opacity: 0.5; cursor: not-allowed; }
         
+        /* Results */
         .results-section { display: none; }
         .result-icon { font-size: 80px; margin: 20px 0; }
         .stats { background: #f1f5f9; padding: 20px; border-radius: 12px; margin: 20px 0; }
@@ -153,6 +155,7 @@ try {
 </head>
 <body>
     <div class="main-card">
+        <!-- SELECTION SCREEN -->
         <div id="selectionScreen">
             <h1>🔥 Warmup Practice</h1>
             
@@ -161,13 +164,16 @@ try {
                 <div class="category-title">
                     📖 Classroom Practice Words
                     <span style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
-                        <?= count($readingWords) ?> words
+                        <?= count($readingWords) ?> word<?= count($readingWords) > 1 ? 's' : '' ?>
                     </span>
                 </div>
                 <div class="word-list">
-                    <?php foreach ($readingWords as $word): ?>
+                    <?php foreach (array_slice($readingWords, 0, 10) as $word): ?>
                         <span class="word-tag"><?= htmlspecialchars($word) ?></span>
                     <?php endforeach; ?>
+                    <?php if (count($readingWords) > 10): ?>
+                        <span class="word-tag">+<?= count($readingWords) - 10 ?> more</span>
+                    <?php endif; ?>
                 </div>
                 <button class="btn btn-primary" onclick="startPractice('reading')">
                     Start Classroom Practice
@@ -180,13 +186,16 @@ try {
                 <div class="category-title">
                     📚 Homework Practice Words
                     <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
-                        <?= count($homeworkWords) ?> words
+                        <?= count($homeworkWords) ?> word<?= count($homeworkWords) > 1 ? 's' : '' ?>
                     </span>
                 </div>
                 <div class="word-list">
-                    <?php foreach ($homeworkWords as $word): ?>
+                    <?php foreach (array_slice($homeworkWords, 0, 10) as $word): ?>
                         <span class="word-tag"><?= htmlspecialchars($word) ?></span>
                     <?php endforeach; ?>
+                    <?php if (count($homeworkWords) > 10): ?>
+                        <span class="word-tag">+<?= count($homeworkWords) - 10 ?> more</span>
+                    <?php endif; ?>
                 </div>
                 <button class="btn btn-secondary" onclick="startPractice('homework')">
                     Start Homework Practice
@@ -197,6 +206,7 @@ try {
             <a href="student_dashboard.php" class="btn back-btn">← Back to Dashboard</a>
         </div>
 
+        <!-- PRACTICE MODE -->
         <div id="practiceMode" class="practice-mode">
             <h1 id="practiceTitle">🔥 Practice Session</h1>
             <p class="practice-status" id="practiceProgress">Word 1 of 0</p>
@@ -205,6 +215,7 @@ try {
             <button id="speakBtn" class="btn btn-speak" onclick="startListening()">🎤 SPEAK</button>
         </div>
 
+        <!-- RESULTS SCREEN -->
         <div id="resultsSection" class="results-section">
             <div class="result-icon">🎊</div>
             <h1>Practice Complete!</h1>
@@ -226,14 +237,14 @@ try {
 
     <script>
     const sid = <?= $student_id ?>;
-    const readingWords = <?= json_encode($readingWords) ?>;
-    const homeworkWords = <?= json_encode($homeworkWords) ?>;
+    const readingWords = <?= json_encode(array_values($readingWords)) ?>;
+    const homeworkWords = <?= json_encode(array_values($homeworkWords)) ?>;
     
-    let currentType = '';
+    let currentType = ''; // 'reading' or 'homework'
     let practiceWords = [];
     let currentIndex = 0;
+    let currentAttempt = 0; // Track attempt number (0 = first try, 1 = second try)
     let masteredWords = [];
-    let failedWords = [];
     let recognition, silenceTimer;
     const synth = window.speechSynthesis;
 
@@ -242,7 +253,6 @@ try {
         practiceWords = type === 'reading' ? [...readingWords] : [...homeworkWords];
         currentIndex = 0;
         masteredWords = [];
-        failedWords = [];
         
         document.getElementById('selectionScreen').style.display = 'none';
         document.getElementById('practiceMode').style.display = 'block';
@@ -250,7 +260,9 @@ try {
         const title = type === 'reading' ? '📖 Classroom Practice' : '📚 Homework Practice';
         document.getElementById('practiceTitle').innerText = title;
         
-        const intro = new SpeechSynthesisUtterance(`Let's practice your ${type === 'reading' ? 'classroom' : 'homework'} words.`);
+        const intro = new SpeechSynthesisUtterance(
+            `Let's practice your ${type === 'reading' ? 'classroom' : 'homework'} words.`
+        );
         intro.lang = 'en-IN';
         intro.onend = () => setTimeout(showWord, 500);
         synth.speak(intro);
@@ -263,6 +275,8 @@ try {
         }
 
         const word = practiceWords[currentIndex];
+        currentAttempt = 0; // Reset attempt counter for new word
+        
         document.getElementById('currentWord').innerText = word.toUpperCase();
         document.getElementById('practiceProgress').innerText = `Word ${currentIndex + 1} of ${practiceWords.length}`;
         document.getElementById('practiceStatus').textContent = "👂 Listen carefully...";
@@ -270,7 +284,7 @@ try {
 
         const utter = new SpeechSynthesisUtterance(word);
         utter.lang = 'en-IN';
-        utter.rate = 0.75;
+        utter.rate = 0.7;
         utter.onend = () => {
             setTimeout(() => {
                 document.getElementById('practiceStatus').textContent = "🎤 Click SPEAK to repeat";
@@ -279,8 +293,6 @@ try {
         };
         synth.speak(utter);
     }
-
-    let attemptCount = 0;
 
     function startListening() {
         if (recognition) try { recognition.stop(); } catch(e) {}
@@ -291,31 +303,77 @@ try {
         recognition.lang = 'en-IN';
         recognition.interimResults = false;
 
-        document.getElementById('practiceStatus').textContent = "🎙️ Listening...";
+        document.getElementById('practiceStatus').textContent = "🎙️ Listening... (5 seconds)";
         document.getElementById('speakBtn').disabled = true;
 
+        let heard = false;
+
+        // 5 second timeout
         silenceTimer = setTimeout(() => {
-            if (recognition) recognition.stop();
-            document.getElementById('practiceStatus').textContent = "⏳ Didn't hear you. Try again.";
-            document.getElementById('speakBtn').disabled = false;
-            
-            const retry = new SpeechSynthesisUtterance("I didn't hear you. Please try again.");
-            retry.lang = 'en-IN';
-            synth.speak(retry);
+            if (!heard && recognition) {
+                recognition.stop();
+                handleTimeout();
+            }
         }, 5000);
 
         recognition.onresult = (event) => {
+            heard = true;
             clearTimeout(silenceTimer);
             const spoken = event.results[0][0].transcript.toLowerCase().trim().replace(/[^\w]/g, '');
             handleResult(spoken);
         };
 
-        recognition.onerror = () => {
+        recognition.onerror = (event) => {
             clearTimeout(silenceTimer);
-            document.getElementById('speakBtn').disabled = false;
+            if (!heard) {
+                handleTimeout();
+            }
         };
 
         try { recognition.start(); } catch(e) {}
+    }
+
+    function handleTimeout() {
+        // No speech detected within 5 seconds
+        if (currentAttempt === 0) {
+            // FIRST TIMEOUT - give second chance
+            currentAttempt = 1;
+            document.getElementById('practiceStatus').textContent = "⏳ Didn't hear you. Try one more time!";
+            
+            const retry = new SpeechSynthesisUtterance("I didn't hear you. Try one more time!");
+            retry.lang = 'en-IN';
+            retry.onend = () => {
+                setTimeout(() => {
+                    // Repeat the word
+                    const word = practiceWords[currentIndex];
+                    const repeat = new SpeechSynthesisUtterance(word);
+                    repeat.lang = 'en-IN';
+                    repeat.rate = 0.65;
+                    repeat.onend = () => {
+                        setTimeout(() => {
+                            document.getElementById('practiceStatus').textContent = "🎤 Click SPEAK - Last chance!";
+                            document.getElementById('speakBtn').disabled = false;
+                        }, 500);
+                    };
+                    synth.speak(repeat);
+                }, 500);
+            };
+            synth.speak(retry);
+
+        } else {
+            // SECOND TIMEOUT - move to next word, keep in database
+            document.getElementById('practiceStatus').innerHTML = "💙 <strong>Keep practicing this one!</strong>";
+            
+            const encourage = new SpeechSynthesisUtterance("Keep practicing!");
+            encourage.lang = 'en-IN';
+            encourage.onend = () => {
+                setTimeout(() => {
+                    currentIndex++;
+                    showWord();
+                }, 1200);
+            };
+            synth.speak(encourage);
+        }
     }
 
     function handleResult(spoken) {
@@ -323,7 +381,7 @@ try {
         const isCorrect = getSimilarityScore(spoken, target) >= 0.65;
 
         if (isCorrect) {
-            // CORRECT - word will be removed
+            // CORRECT - will be REMOVED from database
             masteredWords.push(target);
             document.getElementById('practiceStatus').innerHTML = "✅ <strong>Perfect! Word mastered!</strong>";
             
@@ -331,7 +389,6 @@ try {
             praise.lang = 'en-IN';
             praise.onend = () => {
                 setTimeout(() => {
-                    attemptCount = 0;
                     currentIndex++;
                     showWord();
                 }, 1000);
@@ -339,16 +396,17 @@ try {
             synth.speak(praise);
 
         } else {
-            attemptCount++;
-            
-            if (attemptCount === 1) {
-                // FIRST ATTEMPT FAILED - give one more try
-                document.getElementById('practiceStatus').innerHTML = "⚠️ <strong>Try again! Listen carefully...</strong>";
+            // INCORRECT
+            if (currentAttempt === 0) {
+                // FIRST ATTEMPT WRONG - give second chance
+                currentAttempt = 1;
+                document.getElementById('practiceStatus').innerHTML = "⚠️ <strong>Not quite right. Try once more!</strong>";
                 
                 const encourage = new SpeechSynthesisUtterance("Listen and try again.");
                 encourage.lang = 'en-IN';
                 encourage.onend = () => {
                     setTimeout(() => {
+                        // Repeat the word
                         const repeat = new SpeechSynthesisUtterance(target);
                         repeat.lang = 'en-IN';
                         repeat.rate = 0.65;
@@ -364,15 +422,13 @@ try {
                 synth.speak(encourage);
 
             } else {
-                // SECOND ATTEMPT ALSO FAILED - keep in database
-                failedWords.push(target);
+                // SECOND ATTEMPT ALSO WRONG - move to next, keep in database
                 document.getElementById('practiceStatus').innerHTML = "💙 <strong>Keep practicing this one!</strong>";
                 
                 const keepTrying = new SpeechSynthesisUtterance("Keep practicing!");
                 keepTrying.lang = 'en-IN';
                 keepTrying.onend = () => {
                     setTimeout(() => {
-                        attemptCount = 0;
                         currentIndex++;
                         showWord();
                     }, 1200);
@@ -383,20 +439,19 @@ try {
     }
 
     function completePractice() {
-        // Update database - remove ONLY mastered words, keep failed words
+        // Update database - REMOVE mastered words from appropriate column
         fetch('update_warmup_practice.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 sid: sid,
-                word_type: currentType,
-                mastered_words: masteredWords,
-                failed_words: failedWords
+                word_type: currentType, // 'reading' or 'homework'
+                mastered_words: masteredWords
             })
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Database update:', data);
+            console.log('Database updated:', data);
             showResults();
         })
         .catch(e => {
@@ -411,7 +466,7 @@ try {
         
         const total = practiceWords.length;
         const mastered = masteredWords.length;
-        const remaining = failedWords.length;
+        const remaining = total - mastered;
         
         document.getElementById('totalWords').innerText = total;
         document.getElementById('masteredWords').innerText = mastered;
@@ -430,8 +485,25 @@ try {
 
     function getSimilarityScore(spoken, target) {
         if (spoken === target) return 1.0;
+        
+        // Check base forms
+        const spokenBase = spoken.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
+        const targetBase = target.replace(/(?:ing|ed|s|es|ly|er)$/i, '');
+        if (spokenBase === targetBase) return 0.95;
+        
+        // Substring match
+        if (spoken.includes(target) || target.includes(spoken)) return 0.75;
+        
+        // Levenshtein distance
         const dist = levenshtein(spoken, target);
-        return 1 - (dist / Math.max(spoken.length, target.length));
+        const maxLen = Math.max(spoken.length, target.length);
+        
+        let allowedErrors = 1;
+        if (maxLen > 4) allowedErrors = 2;
+        if (maxLen > 7) allowedErrors = 3;
+        
+        if (dist <= allowedErrors) return Math.max(0.65, 1 - (dist / maxLen));
+        return 1 - (dist / maxLen);
     }
 
     function levenshtein(a, b) {
@@ -440,7 +512,11 @@ try {
         for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
         for (let i = 1; i <= a.length; i++) {
             for (let j = 1; j <= b.length; j++) {
-                tmp[i][j] = Math.min(tmp[i-1][j]+1, tmp[i][j-1]+1, tmp[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+                tmp[i][j] = Math.min(
+                    tmp[i-1][j] + 1,
+                    tmp[i][j-1] + 1,
+                    tmp[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)
+                );
             }
         }
         return tmp[a.length][b.length];
