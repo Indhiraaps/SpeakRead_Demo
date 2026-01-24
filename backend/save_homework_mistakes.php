@@ -110,7 +110,7 @@ try {
         
         file_put_contents($logFile, "Merged words: $wordsString\n", FILE_APPEND);
         
-        $updateStmt = $pdo->prepare("UPDATE Warmup SET homework_mistakes = ?, DateAdded = CURRENT_TIMESTAMP WHERE SID = ?");
+        $updateStmt = $pdo->prepare("UPDATE Warmup SET homework_mistakes = ? WHERE SID = ?");
         $success = $updateStmt->execute([$wordsString, $sid]);
         
         file_put_contents($logFile, "Update success: " . ($success ? 'YES' : 'NO') . "\n", FILE_APPEND);

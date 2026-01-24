@@ -1,10 +1,9 @@
 <?php
 // Centralized Database Configuration
-// IMPORTANT: Update this password to match YOUR database
 $host = 'localhost';
 $dbname = 'speakread_db';
 $user = 'root';
-$pass = '12345678'; // CHANGE THIS TO YOUR PASSWORD
+$pass = '12345678'; // Each developer changes this locally
 
 try {
     $pdo = new PDO(
@@ -20,4 +19,3 @@ try {
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
-?>

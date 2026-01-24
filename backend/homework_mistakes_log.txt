@@ -156,3 +156,56 @@ DATABASE ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'DateAdde
 Error Code: 42S22
 Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\backend\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
 #1 {main}
+
+==================================================
+2026-01-24 16:04:01 - New Request
+Raw Input: {"sid":11,"wrong_words":["water"]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [wrong_words] => Array
+        (
+            [0] => water
+        )
+
+)
+
+Student ID: 11
+Wrong Words Count: 1
+Wrong Words: water
+Student Found: anbu
+Filtered Words: water
+Existing record found (WID: 1)
+Current mistakes: NULL
+Merged words: water
+Update success: YES
+Rows affected: 1
+Verified data: water
+SUCCESS - Response: {"success":true,"message":"Homework mistakes updated successfully","action":"UPDATE","words_saved":1,"total_words":1,"student_id":11,"student_name":"anbu"}
+
+==================================================
+2026-01-24 16:23:30 - New Request
+Raw Input: {"sid":11,"wrong_words":["snow","this"]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [wrong_words] => Array
+        (
+            [0] => snow
+            [1] => this
+        )
+
+)
+
+Student ID: 11
+Wrong Words Count: 2
+Wrong Words: snow, this
+Student Found: anbu
+Filtered Words: snow, this
+Existing record found (WID: 1)
+Current mistakes: water
+Merged words: water, snow, this
+Update success: YES
+Rows affected: 1
+Verified data: water, snow, this
+SUCCESS - Response: {"success":true,"message":"Homework mistakes updated successfully","action":"UPDATE","words_saved":2,"total_words":3,"student_id":11,"student_name":"anbu"}

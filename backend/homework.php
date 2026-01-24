@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/db.php';
+require_once __DIR__ . '/../config/db.php';
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
     header("Location: ../frontend/login.html");
@@ -28,11 +28,7 @@ if (!$hw) { die("Homework not found."); }
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body { 
             font-family: 'Poppins', sans-serif; 
@@ -44,7 +40,6 @@ if (!$hw) { die("Homework not found."); }
             overflow-x: hidden;
         }
         
-        /* FULL SCREEN CARD */
         .main-card { 
             background: rgba(255, 255, 255, 0.98); 
             width: 100vw;
@@ -55,361 +50,186 @@ if (!$hw) { die("Homework not found."); }
             position: relative;
         }
         
-        .header-section {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+        .header-section { text-align: center; margin-bottom: 20px; }
         
         .header-icon {
-            width: 60px;
-            height: 60px;
+            width: 60px; height: 60px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 15px;
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            border-radius: 15px; margin: 0 auto 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
         
         .homework-title {
-            font-size: 26px;
-            font-weight: 800;
+            font-size: 26px; font-weight: 800;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
         
         .status { 
-            font-size: 20px; 
-            font-weight: 600; 
-            margin-bottom: 20px; 
-            color: #4a5568;
-            text-align: center;
+            font-size: 20px; font-weight: 600; margin-bottom: 20px; 
+            color: #4a5568; text-align: center;
         }
         
         .reading-text { 
-            font-size: 28px; 
-            line-height: 1.9; 
-            padding: 35px 40px; 
-            background: #ffffff;
-            border-radius: 20px; 
-            text-align: left; 
+            font-size: 28px; line-height: 1.9; padding: 35px 40px; 
+            background: #ffffff; border-radius: 20px; text-align: left; 
             box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
             border: 2px solid rgba(102, 126, 234, 0.1);
-            max-height: 40vh;
-            overflow-y: auto;
+            max-height: 40vh; overflow-y: auto;
         }
         
         .word { 
-            display: inline; 
-            transition: all 0.3s;
-            color: #2d3748; 
-            padding: 5px 7px; 
-            border-radius: 6px;
+            display: inline; transition: all 0.3s; color: #2d3748; 
+            padding: 5px 7px; border-radius: 6px;
         }
         
         .word.correct { 
-            color: #10b981 !important; 
-            font-weight: 700;
+            color: #10b981 !important; font-weight: 700;
             background: rgba(16, 185, 129, 0.1);
         } 
         
         .word.incorrect { 
-            color: #ef4444 !important; 
-            font-weight: 700;
+            color: #ef4444 !important; font-weight: 700;
             background: rgba(239, 68, 68, 0.1);
         }
         
-        /* LIVE TRANSCRIPT SECTION */
         .transcript-section {
-            margin-top: 20px;
-            padding: 25px;
-            background: #f8fafc;
-            border-radius: 15px;
+            margin-top: 20px; padding: 25px;
+            background: #f8fafc; border-radius: 15px;
             border: 2px solid #e2e8f0;
-            min-height: 150px;
-            max-height: 200px;
-            overflow-y: auto;
+            min-height: 150px; max-height: 200px; overflow-y: auto;
         }
         
         .transcript-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #475569;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 16px; font-weight: 700; color: #475569;
+            margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
         }
         
         .live-indicator {
-            width: 10px;
-            height: 10px;
-            background: #ef4444;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-            display: none;
+            width: 10px; height: 10px; background: #ef4444;
+            border-radius: 50%; animation: blink 1s infinite; display: none;
         }
         
-        .live-indicator.active {
-            display: block;
-        }
+        .live-indicator.active { display: block; }
         
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
         
-        .transcript-text {
-            font-size: 22px;
-            line-height: 1.8;
-            color: #1e293b;
-        }
+        .transcript-text { font-size: 22px; line-height: 1.8; color: #1e293b; }
+        .transcript-word { display: inline; color: #1e293b; font-weight: 500; }
         
-        .transcript-word {
-            display: inline;
-            color: #1e293b;
-            font-weight: 500;
-        }
-        
-        /* LIVE SCORE DISPLAY */
         .score-display {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-            padding: 20px;
+            display: flex; justify-content: center; gap: 30px;
+            margin-top: 20px; padding: 20px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 15px;
-            display: none;
+            border-radius: 15px; display: none;
         }
         
-        .score-display.active {
-            display: flex;
-        }
+        .score-display.active { display: flex; }
         
-        .score-item {
-            text-align: center;
-            color: white;
-        }
+        .score-item { text-align: center; color: white; }
+        .score-label { font-size: 14px; opacity: 0.9; margin-bottom: 5px; }
+        .score-value { font-size: 36px; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         
-        .score-label {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
-        
-        .score-value {
-            font-size: 36px;
-            font-weight: 900;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        
-        #controls {
-            text-align: center;
-            margin-top: 20px;
-        }
+        #controls { text-align: center; margin-top: 20px; }
         
         .btn { 
-            padding: 16px 50px; 
-            border: none; 
-            border-radius: 15px; 
-            cursor: pointer; 
-            font-weight: 700; 
-            font-size: 18px;
-            margin: 10px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            padding: 16px 50px; border: none; border-radius: 15px; 
+            cursor: pointer; font-weight: 700; font-size: 18px;
+            margin: 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.15);
             transition: transform 0.2s;
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-start { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-stop { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; display: none; }
+        .btn-speak { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .btn-start { 
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-        
-        .btn-stop { 
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white; 
-            display: none;
-        }
-        
-        .btn-speak {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Warmup Practice Styles */
-        .warmup-section {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
+        .warmup-section { display: none; text-align: center; padding: 40px; }
         
         .warmup-icon {
-            width: 70px;
-            height: 70px;
+            width: 70px; height: 70px;
             background: linear-gradient(135deg, #f87171, #fb923c);
-            border-radius: 18px;
-            margin: 0 auto 25px;
-            font-size: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 18px; margin: 0 auto 25px; font-size: 36px;
+            display: flex; align-items: center; justify-content: center;
             box-shadow: 0 8px 20px rgba(248, 113, 113, 0.4);
         }
         
         .warmup-title {
-            font-size: 32px;
-            font-weight: 800;
+            font-size: 32px; font-weight: 800;
             background: linear-gradient(135deg, #f87171, #fb923c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 15px;
         }
         
         .current-word {
-            font-size: 80px;
-            font-weight: 900;
+            font-size: 80px; font-weight: 900;
             background: linear-gradient(135deg, #f87171, #fb923c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 40px 0;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin: 40px 0; min-height: 100px;
+            display: flex; align-items: center; justify-content: center;
         }
         
         .status-message {
-            font-size: 22px;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 30px auto;
-            max-width: 600px;
-            min-height: 70px;
-            padding: 20px;
-            background: rgba(248, 113, 113, 0.15);
+            font-size: 22px; font-weight: 600; color: #1e293b;
+            margin: 30px auto; max-width: 600px; min-height: 70px;
+            padding: 20px; background: rgba(248, 113, 113, 0.15);
             border-radius: 15px;
         }
         
-        .progress-info {
-            font-size: 18px;
-            color: #64748b;
-            margin: 15px 0;
-        }
+        .progress-info { font-size: 18px; color: #64748b; margin: 15px 0; }
         
-        /* Complete Section */
-        .complete-section { 
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
+        .complete-section { display: none; text-align: center; padding: 40px; }
         
         .stats {
-            background: #f1f5f9;
-            padding: 30px;
-            border-radius: 16px;
-            margin: 30px auto;
-            max-width: 600px;
+            background: #f1f5f9; padding: 30px; border-radius: 16px;
+            margin: 30px auto; max-width: 600px;
         }
         
         .stat-item {
-            font-size: 20px;
-            margin: 15px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-size: 20px; margin: 15px 0;
+            display: flex; justify-content: space-between; align-items: center;
         }
         
-        .stat-number {
-            font-weight: 800;
-            color: #f87171;
-            font-size: 28px;
-        }
+        .stat-number { font-weight: 800; color: #f87171; font-size: 28px; }
         
         .back-btn { 
             background: linear-gradient(135deg, #6b7280, #4b5563);
-            color: white; 
-            text-decoration: none; 
-            padding: 16px 45px;
-            border-radius: 15px; 
-            font-weight: 700; 
-            display: inline-block;
-            margin-top: 20px;
-            cursor: pointer;
-            border: none;
-            font-size: 18px;
+            color: white; text-decoration: none; padding: 16px 45px;
+            border-radius: 15px; font-weight: 700; display: inline-block;
+            margin-top: 20px; cursor: pointer; border: none; font-size: 18px;
         }
         
-        .back-btn:hover {
-            transform: translateY(-2px);
-        }
+        .back-btn:hover { transform: translateY(-2px); }
         
         .mic-indicator {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background: #ef4444;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            z-index: 1000;
+            position: fixed; top: 30px; right: 30px;
+            width: 50px; height: 50px; background: #ef4444;
+            border-radius: 50%; display: none;
+            align-items: center; justify-content: center;
+            color: white; font-size: 24px; z-index: 1000;
             animation: pulse 1.5s infinite;
         }
         
-        .mic-indicator.active { 
-            display: flex; 
-        }
+        .mic-indicator.active { display: flex; }
         
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.8; }
         }
         
-        /* Responsive Design */
         @media (max-width: 768px) {
-            .main-card {
-                padding: 20px;
-            }
-            
-            .reading-text {
-                font-size: 24px;
-                padding: 25px;
-            }
-            
-            .transcript-text {
-                font-size: 18px;
-            }
-            
-            .btn {
-                padding: 14px 35px;
-                font-size: 16px;
-            }
-            
-            .current-word {
-                font-size: 60px;
-            }
-            
-            .score-value {
-                font-size: 28px;
-            }
+            .main-card { padding: 20px; }
+            .reading-text { font-size: 24px; padding: 25px; }
+            .transcript-text { font-size: 18px; }
+            .btn { padding: 14px 35px; font-size: 16px; }
+            .current-word { font-size: 60px; }
+            .score-value { font-size: 28px; }
         }
     </style>
 </head>
@@ -425,10 +245,8 @@ if (!$hw) { die("Homework not found."); }
                 <div id="status" class="status">Click START and read aloud</div>
             </div>
             
-            <!-- ORIGINAL PASSAGE (Static) -->
             <div id="readingArea" class="reading-text"></div>
 
-            <!-- LIVE TRANSCRIPT DISPLAY -->
             <div class="transcript-section" id="transcriptSection" style="display: none;">
                 <div class="transcript-title">
                     <span class="live-indicator" id="liveIndicator"></span>
@@ -439,7 +257,6 @@ if (!$hw) { die("Homework not found."); }
                 </div>
             </div>
 
-            <!-- LIVE SCORE DISPLAY -->
             <div class="score-display" id="scoreDisplay">
                 <div class="score-item">
                     <div class="score-label">Correct</div>
@@ -464,13 +281,13 @@ if (!$hw) { die("Homework not found."); }
         <!-- WARMUP PRACTICE SECTION -->
         <div id="warmupSection" class="warmup-section">
             <div class="warmup-icon">🔥</div>
-            <h1 class="warmup-title">Let's Correct the Mistaken Words</h1>
+            <h1 class="warmup-title">Warm-Up Speaking Practice</h1>
             <p class="progress-info" id="progressText">Word 1 of 0</p>
             
             <div class="current-word" id="currentWord">READY</div>
             
             <div class="status-message" id="statusMessage">
-                Listen to the word, then click SPEAK to repeat it
+                Listen to the word carefully...
             </div>
             
             <button id="speakBtn" class="btn btn-speak" onclick="startListening()">
@@ -517,12 +334,12 @@ if (!$hw) { die("Homework not found."); }
     let wordStates = {};
     let currentWordPointer = 0;
     let readingAccuracy = 0;
-    let transcriptWords = []; // For live transcript display
+    let transcriptWords = [];
 
-    // Warmup variables
+    // Warmup variables - STRICT 2 ATTEMPT RULE
     let warmupWords = [];
     let currentIndex = 0;
-    let currentAttempt = 0;
+    let currentAttempt = 0; // Tracks attempts: 0 = first, 1 = second
     let warmupRecognition = null;
     let warmupCorrectCount = 0;
     let wordsToSave = [];
@@ -551,7 +368,6 @@ if (!$hw) { die("Homework not found."); }
         return `<span id="word-${idx}" class="word">${token}</span>`;
     }).join('');
 
-    // Update total score display
     document.getElementById('totalScore').innerText = targetWords.length;
 
     function welcomeVoice() {
@@ -578,22 +394,17 @@ if (!$hw) { die("Homework not found."); }
         recognition.interimResults = true;
         recognition.lang = 'en-IN';
 
-        let lastProcessedLength = 0;
-
         recognition.onresult = (event) => {
-            // Show interim results in real-time
             let interimTranscript = '';
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 if (event.results[i].isFinal) {
                     const transcript = event.results[i][0].transcript.trim().toLowerCase();
                     processTranscript(transcript);
-                    lastProcessedLength = i + 1;
                 } else {
                     interimTranscript += event.results[i][0].transcript;
                 }
             }
             
-            // Update live transcript with interim results
             if (interimTranscript) {
                 updateTranscriptDisplay(interimTranscript, false);
             }
@@ -630,7 +441,6 @@ if (!$hw) { die("Homework not found."); }
             transcriptText.appendChild(document.createTextNode(' '));
         });
         
-        // Auto-scroll to bottom
         transcriptText.parentElement.scrollTop = transcriptText.parentElement.scrollHeight;
     }
 
@@ -728,7 +538,7 @@ if (!$hw) { die("Homework not found."); }
         warmupCorrectCount = 0;
         wordsToSave = [];
 
-        const intro = new SpeechSynthesisUtterance("Let's correct the mistaken words");
+        const intro = new SpeechSynthesisUtterance("Let's practice these words.");
         intro.lang = 'en-IN';
         intro.onend = () => {
             setTimeout(() => practiceWord(), 800);
@@ -736,6 +546,9 @@ if (!$hw) { die("Homework not found."); }
         synth.speak(intro);
     }
 
+    // ========================================
+    // 🎯 WARMUP PRACTICE - STRICT 2 ATTEMPT RULE
+    // ========================================
     function practiceWord() {
         if (currentIndex >= warmupWords.length) {
             showComplete();
@@ -743,13 +556,14 @@ if (!$hw) { die("Homework not found."); }
         }
 
         const word = warmupWords[currentIndex];
-        currentAttempt = 0;
+        currentAttempt = 0; // Reset to 0 for new word
 
         document.getElementById('currentWord').innerText = word.toUpperCase();
         document.getElementById('progressText').innerText = `Word ${currentIndex + 1} of ${warmupWords.length}`;
         document.getElementById('statusMessage').innerText = 'Listen to the word...';
         document.getElementById('speakBtn').disabled = true;
 
+        // Speak the word first
         setTimeout(() => {
             const msg = new SpeechSynthesisUtterance(word);
             msg.lang = 'en-IN';
@@ -805,33 +619,25 @@ if (!$hw) { die("Homework not found."); }
     function handleNoSpeech() {
         document.getElementById('micIndicator').classList.remove('active');
         
+        // FIRST ATTEMPT (currentAttempt = 0)
         if (currentAttempt === 0) {
-            document.getElementById('statusMessage').innerText = "I didn't hear you. Please speak again!";
+            currentAttempt = 1; // Mark as second attempt
+            document.getElementById('statusMessage').innerText = "I couldn't hear you. Try again.";
             
-            const retry = new SpeechSynthesisUtterance("I didn't hear you. Please speak again!");
+            const retry = new SpeechSynthesisUtterance("I couldn't hear you. Try again.");
             retry.lang = 'en-IN';
             retry.onend = () => {
                 setTimeout(() => {
                     document.getElementById('speakBtn').disabled = false;
-                }, 500);
+                }, 800);
             };
             synth.speak(retry);
-        } else {
-            wordsToSave.push(warmupWords[currentIndex]);
-            document.getElementById('statusMessage').innerText = "It's okay, let's move to the next word";
-            
-            const moveOn = new SpeechSynthesisUtterance("It's okay, let's move to the next word");
-            moveOn.lang = 'en-IN';
-            moveOn.onend = () => {
-                setTimeout(() => {
-                    currentIndex++;
-                    practiceWord();
-                }, 1500);
-            };
-            synth.speak(moveOn);
+        } 
+        // SECOND ATTEMPT - MOVE TO NEXT WORD
+        else {
+            wordsToSave.push(warmupWords[currentIndex]); // Save to database
+            moveToNextWord();
         }
-        
-        currentAttempt++;
     }
 
     function checkPronunciation(spoken, target) {
@@ -840,62 +646,76 @@ if (!$hw) { die("Homework not found."); }
         const similarity = getSimilarityScore(spoken, target);
         const isCorrect = similarity >= 0.65;
 
+        // ✅ CORRECT - Move to next word
         if (isCorrect) {
             warmupCorrectCount++;
-            document.getElementById('statusMessage').innerText = '✅ Great work!';
+            document.getElementById('statusMessage').innerText = '✅ Great job!';
             document.getElementById('currentWord').style.color = '#10b981';
             
-            const praise = new SpeechSynthesisUtterance('Great work!');
+            const praise = new SpeechSynthesisUtterance('Great job!');
             praise.lang = 'en-IN';
             praise.onend = () => {
                 setTimeout(() => {
                     document.getElementById('currentWord').style.color = '';
                     currentIndex++;
                     practiceWord();
-                }, 1500);
+                }, 1200);
             };
             synth.speak(praise);
-
-        } else {
+        } 
+        // ❌ WRONG
+        else {
+            // FIRST ATTEMPT (currentAttempt = 0)
             if (currentAttempt === 0) {
-                currentAttempt = 1;
-                document.getElementById('statusMessage').innerText = 'Not quite right. Try once more!';
+                currentAttempt = 1; // Mark as second attempt
+                document.getElementById('statusMessage').innerText = 'Try again!';
                 document.getElementById('currentWord').style.color = '#ef4444';
                 
-                const encourage = new SpeechSynthesisUtterance('Not quite right. Try once more!');
+                const encourage = new SpeechSynthesisUtterance('Try again!');
                 encourage.lang = 'en-IN';
                 encourage.onend = () => {
                     setTimeout(() => {
-                        const repeat = new SpeechSynthesisUtterance(target);
-                        repeat.lang = 'en-IN';
-                        repeat.rate = 0.7;
-                        repeat.onend = () => {
-                            setTimeout(() => {
-                                document.getElementById('currentWord').style.color = '';
-                                document.getElementById('statusMessage').innerText = 'Click SPEAK and try again';
-                                document.getElementById('speakBtn').disabled = false;
-                            }, 500);
-                        };
-                        synth.speak(repeat);
-                    }, 500);
+                        document.getElementById('currentWord').style.color = '';
+                        document.getElementById('statusMessage').innerText = 'Click SPEAK and try again';
+                        document.getElementById('speakBtn').disabled = false;
+                    }, 800);
                 };
                 synth.speak(encourage);
-
-            } else {
-                wordsToSave.push(target);
-                document.getElementById('statusMessage').innerText = "It's okay, let's move to the next word";
-                
-                const moveOn = new SpeechSynthesisUtterance("It's okay, let's move to the next word");
-                moveOn.lang = 'en-IN';
-                moveOn.onend = () => {
-                    setTimeout(() => {
-                        document.getElementById('currentWord').style.color = '';
-                        currentIndex++;
-                        practiceWord();
-                    }, 1500);
-                };
-                synth.speak(moveOn);
+            } 
+            // SECOND ATTEMPT - MOVE TO NEXT WORD
+            else {
+                wordsToSave.push(target); // Save to database
+                moveToNextWord();
             }
+        }
+    }
+
+    function moveToNextWord() {
+        const isLastWord = (currentIndex === warmupWords.length - 1);
+        
+        if (isLastWord) {
+            // 🏁 LAST WORD - Show completion message
+            document.getElementById('statusMessage').innerText = "Well done! You finished today's practice.";
+            
+            const closing = new SpeechSynthesisUtterance("Great job! You have completed the warm-up session.");
+            closing.lang = 'en-IN';
+            closing.onend = () => {
+                setTimeout(() => showComplete(), 2000);
+            };
+            synth.speak(closing);
+        } else {
+            // Continue to next word
+            document.getElementById('statusMessage').innerText = "Let's try the next word.";
+            
+            const next = new SpeechSynthesisUtterance("Let's try the next word.");
+            next.lang = 'en-IN';
+            next.onend = () => {
+                setTimeout(() => {
+                    currentIndex++;
+                    practiceWord();
+                }, 1200);
+            };
+            synth.speak(next);
         }
     }
 
@@ -918,7 +738,7 @@ if (!$hw) { die("Homework not found."); }
         document.getElementById('finalMessage').innerText = message;
 
         const finalMsg = new SpeechSynthesisUtterance(
-            needMore === 0 ? 'Amazing! You corrected all the words!' : 'Good job! Keep practicing.'
+            needMore === 0 ? 'Excellent work!' : 'Good job! Keep practicing.'
         );
         finalMsg.lang = 'en-IN';
         synth.speak(finalMsg);
@@ -927,7 +747,7 @@ if (!$hw) { die("Homework not found."); }
     }
 
     function saveHomeworkMistakes() {
-        console.log('=== SAVING HOMEWORK MISTAKES ===');
+        console.log('=== SAVING HOMEWORK DATA ===');
         console.log('Student ID:', sid);
         console.log('Words to save:', wordsToSave);
         
@@ -962,7 +782,7 @@ if (!$hw) { die("Homework not found."); }
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log('✅ Mistakes saved:', data);
+                    console.log('✅ Mistakes saved to database:', data);
                 } else {
                     console.error('❌ Save failed:', data.message);
                 }

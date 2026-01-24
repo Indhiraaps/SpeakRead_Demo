@@ -439,23 +439,39 @@ try {
     }
 
     function completePractice() {
-        // Update database - REMOVE mastered words from appropriate column
-        fetch('update_warmup_practice.php', {
+        console.log('=== COMPLETE PRACTICE CALLED ===');
+        console.log('Student ID:', sid);
+        console.log('Word Type:', currentType);
+        console.log('Mastered Words:', masteredWords);
+        
+        const payload = {
+            sid: sid,
+            word_type: currentType,
+            mastered_words: masteredWords
+        };
+        
+        console.log('Sending payload:', payload);
+        
+        fetch('update_warmup.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                sid: sid,
-                word_type: currentType, // 'reading' or 'homework'
-                mastered_words: masteredWords
-            })
+            body: JSON.stringify(payload)
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
-            console.log('Database updated:', data);
+            console.log('Response data:', data);
+            if (data.success) {
+                console.log('✅ SUCCESS - Words removed from database');
+            } else {
+                console.error('❌ FAILED:', data.message);
+            }
             showResults();
         })
         .catch(e => {
-            console.error('Update error:', e);
+            console.error('❌ FETCH ERROR:', e);
             showResults();
         });
     }

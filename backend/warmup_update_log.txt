@@ -1,0 +1,114 @@
+
+==================================================
+2026-01-24 15:55:54 - New Request
+Raw Input: {"sid":11,"word_type":"reading","mastered_words":["crayons","black"]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [word_type] => reading
+    [mastered_words] => Array
+        (
+            [0] => crayons
+            [1] => black
+        )
+
+)
+
+Student ID: 11
+Word Type: reading
+Mastered Words: crayons, black
+Column to update: reading_practice_mistakes
+Current DB value: crayons, black
+Current Words Array: Array
+(
+    [0] => crayons
+    [1] => black
+)
+
+Words Count Before: 2
+Remaining Words Array: Array
+(
+)
+
+Words Count After: 0
+New DB Value: NULL
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: NULL
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"reading_practice_mistakes","words_before":2,"words_mastered":2,"words_remaining":0,"mastered_words":["crayons","black"],"remaining_words":[],"new_db_value":null}
+
+==================================================
+2026-01-24 15:58:12 - New Request
+Raw Input: {"sid":11,"word_type":"reading","mastered_words":[]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [word_type] => reading
+    [mastered_words] => Array
+        (
+        )
+
+)
+
+Student ID: 11
+Word Type: reading
+Mastered Words: 
+Column to update: reading_practice_mistakes
+Current DB value: black
+Current Words Array: Array
+(
+    [0] => black
+)
+
+Words Count Before: 1
+Remaining Words Array: Array
+(
+    [0] => black
+)
+
+Words Count After: 1
+New DB Value: black
+Update Success: YES
+Rows Affected: 0
+Verified DB Value After Update: black
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"reading_practice_mistakes","words_before":1,"words_mastered":0,"words_remaining":1,"mastered_words":[],"remaining_words":["black"],"new_db_value":"black"}
+
+==================================================
+2026-01-24 16:24:52 - New Request
+Raw Input: {"sid":11,"word_type":"homework","mastered_words":["water","snow"]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [word_type] => homework
+    [mastered_words] => Array
+        (
+            [0] => water
+            [1] => snow
+        )
+
+)
+
+Student ID: 11
+Word Type: homework
+Mastered Words: water, snow
+Column to update: homework_mistakes
+Current DB value: water, snow, this
+Current Words Array: Array
+(
+    [0] => water
+    [1] => snow
+    [2] => this
+)
+
+Words Count Before: 3
+Remaining Words Array: Array
+(
+    [2] => this
+)
+
+Words Count After: 1
+New DB Value: this
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: this
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"homework_mistakes","words_before":3,"words_mastered":2,"words_remaining":1,"mastered_words":["water","snow"],"remaining_words":["this"],"new_db_value":"this"}
