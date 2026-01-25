@@ -209,3 +209,61 @@ Update success: YES
 Rows affected: 1
 Verified data: water, snow, this
 SUCCESS - Response: {"success":true,"message":"Homework mistakes updated successfully","action":"UPDATE","words_saved":2,"total_words":3,"student_id":11,"student_name":"anbu"}
+
+==================================================
+2026-01-25 04:34:12 - New Request
+Raw Input: {"sid":11,"wrong_words":["paper"]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [wrong_words] => Array
+        (
+            [0] => paper
+        )
+
+)
+
+Student ID: 11
+Wrong Words Count: 1
+Wrong Words: paper
+Student Found: anbu
+Filtered Words: paper
+Existing record found (WID: 1)
+Current mistakes: NULL
+Merged words: paper
+Update success: YES
+Rows affected: 1
+Verified data: paper
+SUCCESS - Response: {"success":true,"message":"Homework mistakes updated successfully","action":"UPDATE","words_saved":1,"total_words":1,"student_id":11,"student_name":"anbu"}
+
+==================================================
+2026-01-25 06:14:59 - New Request
+Raw Input: {"sid":11,"wrong_words":["squirrels"]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [wrong_words] => Array
+        (
+            [0] => squirrels
+        )
+
+)
+
+Student ID: 11
+Wrong Words Count: 1
+Wrong Words: squirrels
+Student Found: anbu
+Filtered Words: squirrels
+No existing record - inserting new
+Words to insert: squirrels
+Insert success: YES
+New WID: 1
+Verified data: Array
+(
+    [WID] => 1
+    [SID] => 11
+    [homework_mistakes] => squirrels
+    [reading_practice_mistakes] => 
+)
+
+SUCCESS - Response: {"success":true,"message":"Homework mistakes saved successfully","action":"INSERT","words_saved":1,"student_id":11,"student_name":"anbu"}

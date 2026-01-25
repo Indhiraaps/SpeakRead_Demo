@@ -685,7 +685,7 @@ try {
                 <h1>Hello, <?= htmlspecialchars($student_name) ?>!</h1>
                 <p>
                     Ready to practice pronunciation today? 
-                    <span class="grade-badge">Grade <?= htmlspecialchars($grade) ?></span>
+                    <span class="grade-badge"><?= htmlspecialchars($grade) ?></span>
                     • <?= date('l, F j, Y') ?>
                 </p>
             </div>

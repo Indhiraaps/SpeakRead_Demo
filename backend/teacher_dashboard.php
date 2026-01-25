@@ -7,9 +7,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'teacher') {
     exit();
 }
 
-// 🔧 FIX: Check if user_id exists in session
+// Check if user_id exists in session
 if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
-    // Session is invalid - force logout
     session_destroy();
     echo "<script>alert('Session expired. Please login again.'); window.location.href='../frontend/login.html';</script>";
     exit();
@@ -19,13 +18,12 @@ if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
 $host = 'localhost'; 
 $db = 'speakread_db'; 
 $user = 'root'; 
-$pass = '12345678'; // ⚠️ CHANGE TO YOUR PASSWORD
+$pass = '12345678';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // 🔧 FIX: Fetch unique grades for this teacher (exclude NULL grades and empty TIDs)
     $stmt = $pdo->prepare("SELECT DISTINCT Grade FROM Students WHERE TID = ? AND Grade IS NOT NULL AND Grade != '' ORDER BY Grade");
     $stmt->execute([$_SESSION['user_id']]);
     $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -60,13 +58,11 @@ try {
         .btn { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .btn:hover { background: #1d4ed8; }
         
-        /* Empty State */
         .empty-state { text-align: center; padding: 60px 20px; color: #64748b; }
         .empty-state-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
         .empty-state h2 { color: #1e293b; margin-bottom: 10px; }
         .empty-state p { font-size: 16px; }
         
-        /* Modal Styles */
         #classModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index: 1000; }
         .modal-content { background:white; padding:30px; border-radius:12px; width:450px; max-height: 90vh; overflow-y: auto; }
         .modal-content h2 { margin-top: 0; color: #1e293b; }
@@ -75,7 +71,6 @@ try {
         .modal-content input[type="file"] { width:100%; padding:10px; margin-bottom:20px; border:1px solid #cbd5e1; border-radius:6px; font-size: 14px; }
         .modal-content input[type="file"] { padding: 8px; }
         
-        /* Format Guide Box */
         .format-box { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 12px; border: 1px solid #e2e8f0; }
         .format-box strong { color: #475569; display: block; margin-bottom: 8px; }
         .format-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
@@ -83,7 +78,6 @@ try {
         .format-table td { padding: 5px; color: #94a3b8; }
         .format-box p { margin: 8px 0 0 0; color: #64748b; }
         
-        /* Button Group */
         .btn-group { display:flex; gap:10px; }
         .btn-secondary { background:#94a3b8; }
         .btn-secondary:hover { background: #64748b; }
@@ -107,26 +101,23 @@ try {
     </div>
 
     <?php if (empty($classes)): ?>
-        <!-- Empty State -->
         <div class="empty-state">
             <div class="empty-state-icon">📚</div>
             <h2>No Classes Yet</h2>
             <p>Click "Create New Class" above to get started with your first class</p>
         </div>
     <?php else: ?>
-        <!-- Class Cards -->
         <div class="class-grid">
             <?php foreach ($classes as $class): ?>
-                <div class="class-card" onclick="window.location.href='lessons.php?grade=<?php echo urlencode($class['Grade']); ?>'">
+                <div class="class-card" onclick="window.location.href='grade_management.php?grade=<?php echo urlencode($class['Grade']); ?>'">
                     <h3><?php echo htmlspecialchars($class['Grade']); ?></h3>
-                    <p>Click to manage homework & lessons</p>
+                    <p>Click to manage this class</p>
                 </div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
 </div>
 
-<!-- Create Class Modal -->
 <div id="classModal">
     <div class="modal-content">
         <h2>Create New Class</h2>
@@ -163,14 +154,12 @@ try {
 </div>
 
 <script>
-// Close modal when clicking outside
 document.getElementById('classModal').addEventListener('click', function(e) {
     if (e.target === this) {
         this.style.display = 'none';
     }
 });
 
-// Close modal with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         document.getElementById('classModal').style.display = 'none';

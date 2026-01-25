@@ -15,12 +15,27 @@ try {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Management - <?php echo htmlspecialchars($grade); ?></title>
+    <title>Lessons - <?php echo htmlspecialchars($grade); ?></title>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; display: flex; }
         .sidebar { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background: white; border-right: 1px solid #e2e8f0; padding: 24px; box-sizing: border-box; }
         .content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); box-sizing: border-box; }
         .logo { color: #2563eb; font-weight: 800; font-size: 24px; text-decoration: none; display: block; margin-bottom: 40px; }
+        .back-link {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .back-link:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .main-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; margin-bottom: 24px; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #1e293b; }
@@ -37,41 +52,36 @@ try {
         .toggle-btn { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #94a3b8; display: flex; align-items: center; }
         
         .long-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 24px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: white; display: flex; align-items: center; text-decoration: none; color: #334155; font-weight: 600; }
+        .long-card:hover { background: #f8fafc; border-color: #2563eb; }
         .num-circle { width: 32px; height: 32px; background-color: #ebf2ff; color: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; margin-right: 15px; flex-shrink: 0; }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <a href="#" class="logo">SpeakRead</a>
-        <a href="teacher_dashboard.php" style="color: #64748b; text-decoration: none; font-size: 14px;">← Back to Dashboard</a>
+        <a href="grade_management.php?grade=<?php echo urlencode($grade); ?>" class="back-link">
+            ← Back to Management
+        </a>
     </div>
 
     <div class="content">
         <div class="header-row">
-            <h1 style="font-size: 32px; font-weight: 800; margin: 0;">Management: <?php echo htmlspecialchars($grade); ?></h1>
+            <h1 style="font-size: 32px; font-weight: 800; margin: 0;">Lessons: <?php echo htmlspecialchars($grade); ?></h1>
             <button class="btn" onclick="document.getElementById('studentModal').style.display='flex'">+ Add Student</button>
-        </div>
-
-        <div class="main-card">
-            <div class="section-title">Weekly Homework Status</div>
-            <div style="display: flex; gap: 12px;">
-                <?php foreach(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?>
-                    <div style="background: #eff6ff; padding: 12px; border-radius: 8px; text-align: center; flex: 1; border: 1px solid #dbeafe;">
-                        <div style="font-size: 11px; font-weight: 800; color: #3b82f6; margin-bottom: 5px;"><?php echo $d; ?></div>
-                        <input type="checkbox" checked>
-                    </div>
-                <?php endforeach; ?>
-            </div>
         </div>
         
         <div class="main-card">
             <div class="section-title">Select a Lesson</div>
-            <?php foreach($lessons as $l): ?>
-                <a href="paragraphs.php?grade=<?php echo urlencode($grade); ?>&lesson=<?php echo urlencode($l['LessonName']); ?>" class="long-card">
-                    <div class="num-circle"><?php echo htmlspecialchars($l['LessonNumber']); ?></div>
-                    <?php echo htmlspecialchars($l['LessonName']); ?>
-                </a>
-            <?php endforeach; ?>
+            <?php if (empty($lessons)): ?>
+                <p style="color: #64748b; text-align: center; padding: 40px 0;">No lessons available for this grade yet.</p>
+            <?php else: ?>
+                <?php foreach($lessons as $l): ?>
+                    <a href="paragraphs.php?grade=<?php echo urlencode($grade); ?>&lesson=<?php echo urlencode($l['LessonName']); ?>" class="long-card">
+                        <div class="num-circle"><?php echo htmlspecialchars($l['LessonNumber']); ?></div>
+                        <?php echo htmlspecialchars($l['LessonName']); ?>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 

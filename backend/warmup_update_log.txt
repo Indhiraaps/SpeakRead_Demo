@@ -112,3 +112,89 @@ Update Success: YES
 Rows Affected: 1
 Verified DB Value After Update: this
 SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"homework_mistakes","words_before":3,"words_mastered":2,"words_remaining":1,"mastered_words":["water","snow"],"remaining_words":["this"],"new_db_value":"this"}
+
+==================================================
+2026-01-25 04:36:44 - New Request
+Raw Input: {"sid":11,"word_type":"reading","mastered_words":["rectangle","between","said","best","friends"]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [word_type] => reading
+    [mastered_words] => Array
+        (
+            [0] => rectangle
+            [1] => between
+            [2] => said
+            [3] => best
+            [4] => friends
+        )
+
+)
+
+Student ID: 11
+Word Type: reading
+Mastered Words: rectangle, between, said, best, friends
+Column to update: reading_practice_mistakes
+Current DB value: rectangle, began, fight, between, said, best, friends, each
+Current Words Array: Array
+(
+    [0] => rectangle
+    [1] => began
+    [2] => fight
+    [3] => between
+    [4] => said
+    [5] => best
+    [6] => friends
+    [7] => each
+)
+
+Words Count Before: 8
+Remaining Words Array: Array
+(
+    [1] => began
+    [2] => fight
+    [7] => each
+)
+
+Words Count After: 3
+New DB Value: began, fight, each
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: began, fight, each
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"reading_practice_mistakes","words_before":8,"words_mastered":5,"words_remaining":3,"mastered_words":["rectangle","between","said","best","friends"],"remaining_words":["began","fight","each"],"new_db_value":"began, fight, each"}
+
+==================================================
+2026-01-25 04:37:04 - New Request
+Raw Input: {"sid":11,"word_type":"homework","mastered_words":["paper"]}
+Decoded Data: Array
+(
+    [sid] => 11
+    [word_type] => homework
+    [mastered_words] => Array
+        (
+            [0] => paper
+        )
+
+)
+
+Student ID: 11
+Word Type: homework
+Mastered Words: paper
+Column to update: homework_mistakes
+Current DB value: paper
+Current Words Array: Array
+(
+    [0] => paper
+)
+
+Words Count Before: 1
+Remaining Words Array: Array
+(
+)
+
+Words Count After: 0
+New DB Value: NULL
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: NULL
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"homework_mistakes","words_before":1,"words_mastered":1,"words_remaining":0,"mastered_words":["paper"],"remaining_words":[],"new_db_value":null}
