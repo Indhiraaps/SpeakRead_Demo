@@ -18,7 +18,7 @@ if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
 $host = 'localhost'; 
 $db = 'speakread_db'; 
 $user = 'root'; 
-$pass = '12345678';
+$pass = 'skdn1418';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);

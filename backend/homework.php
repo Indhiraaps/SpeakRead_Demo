@@ -580,12 +580,12 @@ if (!$hw) { die("Homework not found."); }
 
     function startListening() {
         document.getElementById('speakBtn').disabled = true;
-        document.getElementById('statusMessage').innerText = '🎤 Listening... (5 seconds)';
+        document.getElementById('statusMessage').innerText = '🎤 Listening... ';
         document.getElementById('micIndicator').classList.add('active');
 
         window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         warmupRecognition = new SpeechRecognition();
-        warmupRecognition.continuous = false;
+        warmupRecognition.continuous = true;
         warmupRecognition.interimResults = false;
         warmupRecognition.lang = 'en-IN';
 
@@ -593,7 +593,7 @@ if (!$hw) { die("Homework not found."); }
 
         warmupRecognition.onresult = (event) => {
             heard = true;
-            clearTimeout(listeningTimeout);
+            
             const spoken = event.results[0][0].transcript.trim().toLowerCase().replace(/[^\w]/g, '');
             const target = warmupWords[currentIndex].toLowerCase();
             checkPronunciation(spoken, target);
@@ -606,13 +606,7 @@ if (!$hw) { die("Homework not found."); }
             }
         };
 
-        listeningTimeout = setTimeout(() => {
-            if (!heard) {
-                warmupRecognition.stop();
-                handleNoSpeech();
-            }
-        }, 5000);
-
+       
         warmupRecognition.start();
     }
 
@@ -642,10 +636,10 @@ if (!$hw) { die("Homework not found."); }
 
     function checkPronunciation(spoken, target) {
         document.getElementById('micIndicator').classList.remove('active');
-        
+        warmupRecognition.stop();
         const similarity = getSimilarityScore(spoken, target);
-        const isCorrect = similarity >= 0.65;
-
+        const isCorrect = similarity >= 0.55;
+        
         // ✅ CORRECT - Move to next word
         if (isCorrect) {
             warmupCorrectCount++;
@@ -683,27 +677,34 @@ if (!$hw) { die("Homework not found."); }
                 synth.speak(encourage);
             } 
             // SECOND ATTEMPT - MOVE TO NEXT WORD
-            else {
-                wordsToSave.push(target); // Save to database
-                moveToNextWord();
-            }
+           // SECOND ATTEMPT - MOVE TO NEXT WORD
+else {
+    wordsToSave.push(target); // Save to database
+    
+    document.getElementById('statusMessage').innerText = "No problem! We'll practice this later.";
+    document.getElementById('currentWord').style.color = '#fb923c';
+    
+    const encourage = new SpeechSynthesisUtterance("No problem! We'll practice this later.");
+    encourage.lang = 'en-IN';
+    encourage.onend = () => {
+        setTimeout(() => {
+            document.getElementById('currentWord').style.color = '';
+            moveToNextWord();
+        }, 1200);
+    };
+    synth.speak(encourage);
+}
         }
     }
 
-    function moveToNextWord() {
-        const isLastWord = (currentIndex === warmupWords.length - 1);
-        
-        if (isLastWord) {
-            // 🏁 LAST WORD - Show completion message
-            document.getElementById('statusMessage').innerText = "Well done! You finished today's practice.";
-            
-            const closing = new SpeechSynthesisUtterance("Great job! You have completed the warm-up session.");
-            closing.lang = 'en-IN';
-            closing.onend = () => {
-                setTimeout(() => showComplete(), 2000);
-            };
-            synth.speak(closing);
-        } else {
+   function moveToNextWord() {
+    const isLastWord = (currentIndex === warmupWords.length - 1);
+    
+    if (isLastWord) {
+        // 🏁 LAST WORD - Go directly to results (no speech here)
+        setTimeout(() => showComplete(), 1000);
+    } 
+    else {
             // Continue to next word
             document.getElementById('statusMessage').innerText = "Let's try the next word.";
             

@@ -3,7 +3,7 @@
 $host = 'localhost';
 $dbname = 'speakread_db';
 $user = 'root';
-$pass = '12345678'; // Each developer changes this locally
+$pass = 'skdn1418'; // Each developer changes this locally
 
 try {
     $pdo = new PDO(
