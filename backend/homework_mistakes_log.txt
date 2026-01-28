@@ -267,3 +267,88 @@ Verified data: Array
 )
 
 SUCCESS - Response: {"success":true,"message":"Homework mistakes saved successfully","action":"INSERT","words_saved":1,"student_id":11,"student_name":"anbu"}
+
+==================================================
+2026-01-25 13:01:06 - New Request
+Raw Input: {"sid":53,"wrong_words":["system"]}
+Decoded Data: Array
+(
+    [sid] => 53
+    [wrong_words] => Array
+        (
+            [0] => system
+        )
+
+)
+
+Student ID: 53
+Wrong Words Count: 1
+Wrong Words: system
+Student Found: Arav
+Filtered Words: system
+No existing record - inserting new
+Words to insert: system
+Insert success: YES
+New WID: 3
+Verified data: Array
+(
+    [WID] => 3
+    [SID] => 53
+    [homework_mistakes] => system
+    [reading_practice_mistakes] => 
+)
+
+SUCCESS - Response: {"success":true,"message":"Homework mistakes saved successfully","action":"INSERT","words_saved":1,"student_id":53,"student_name":"Arav"}
+
+==================================================
+2026-01-26 08:59:07 - New Request
+Raw Input: {"sid":46,"wrong_words":["elephants"]}
+Decoded Data: Array
+(
+    [sid] => 46
+    [wrong_words] => Array
+        (
+            [0] => elephants
+        )
+
+)
+
+Student ID: 46
+Wrong Words Count: 1
+Wrong Words: elephants
+Student Found: Anbu
+Filtered Words: elephants
+Existing record found (WID: 2)
+Current mistakes: NULL
+Merged words: elephants
+Update success: YES
+Rows affected: 1
+Verified data: elephants
+SUCCESS - Response: {"success":true,"message":"Homework mistakes updated successfully","action":"UPDATE","words_saved":1,"total_words":1,"student_id":46,"student_name":"Anbu"}
+
+==================================================
+2026-01-26 09:22:30 - New Request
+Raw Input: {"sid":46,"wrong_words":["largest","need"]}
+Decoded Data: Array
+(
+    [sid] => 46
+    [wrong_words] => Array
+        (
+            [0] => largest
+            [1] => need
+        )
+
+)
+
+Student ID: 46
+Wrong Words Count: 2
+Wrong Words: largest, need
+Student Found: Anbu
+Filtered Words: largest, need
+Existing record found (WID: 2)
+Current mistakes: NULL
+Merged words: largest, need
+Update success: YES
+Rows affected: 1
+Verified data: largest, need
+SUCCESS - Response: {"success":true,"message":"Homework mistakes updated successfully","action":"UPDATE","words_saved":2,"total_words":2,"student_id":46,"student_name":"Anbu"}

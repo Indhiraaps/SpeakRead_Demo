@@ -3,7 +3,7 @@ session_start();
 $host = 'localhost'; 
 $db = 'speakread_db'; 
 $user = 'root'; 
-$pass = 'skdn1418'; 
+$pass = '12345678'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         
                         $name = trim($data[0]);
                         $email = trim($data[1]);
-                        $password = trim($data[2]);
+                        $password = trim($data[2]); // This is the plain text from CSV
                         
                         // Check both tables simultaneously
                         $checkStmt->execute([$email, $email]);
@@ -43,10 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             continue; // Skip this student and move to the next row
                         }
                         
-                        $hashed_password = hash('sha256', $password);
-                        
+                        // REWRITE: Removed hash() function to keep password as plain text
                         try {
-                            $insertStmt->execute([$name, $email, $hashed_password, $grade, $teacher_id]);
+                            $insertStmt->execute([$name, $email, $password, $grade, $teacher_id]);
                             $success_count++;
                         } catch (PDOException $e) {
                             $skip_count++;
@@ -66,7 +65,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             // Handle class initialization with a unique placeholder email
             $placeholder_email = 'class_init_' . time() . '_' . rand(1000, 9999) . '@speakread.com';
-            $placeholder_password = hash('sha256', 'nopassword');
+            
+            // REWRITE: Removed hash() function to store 'nopassword' as plain text
+            $placeholder_password = 'nopassword';
             
             $stmt = $pdo->prepare("INSERT INTO Students (Name, Email, Password, Grade, TID) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute(['System Placeholder', $placeholder_email, $placeholder_password, $grade, $teacher_id]);

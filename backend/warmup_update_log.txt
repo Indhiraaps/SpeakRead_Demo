@@ -198,3 +198,199 @@ Update Success: YES
 Rows Affected: 1
 Verified DB Value After Update: NULL
 SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"homework_mistakes","words_before":1,"words_mastered":1,"words_remaining":0,"mastered_words":["paper"],"remaining_words":[],"new_db_value":null}
+
+==================================================
+2026-01-25 12:47:19 - New Request
+Raw Input: {"sid":46,"word_type":"reading","mastered_words":["happy","returning"]}
+Decoded Data: Array
+(
+    [sid] => 46
+    [word_type] => reading
+    [mastered_words] => Array
+        (
+            [0] => happy
+            [1] => returning
+        )
+
+)
+
+Student ID: 46
+Word Type: reading
+Mastered Words: happy, returning
+Column to update: reading_practice_mistakes
+Current DB value: happy, returning
+Current Words Array: Array
+(
+    [0] => happy
+    [1] => returning
+)
+
+Words Count Before: 2
+Remaining Words Array: Array
+(
+)
+
+Words Count After: 0
+New DB Value: NULL
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: NULL
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"reading_practice_mistakes","words_before":2,"words_mastered":2,"words_remaining":0,"mastered_words":["happy","returning"],"remaining_words":[],"new_db_value":null}
+
+==================================================
+2026-01-26 09:10:38 - New Request
+Raw Input: {"sid":46,"word_type":"reading","mastered_words":["out","each"]}
+Decoded Data: Array
+(
+    [sid] => 46
+    [word_type] => reading
+    [mastered_words] => Array
+        (
+            [0] => out
+            [1] => each
+        )
+
+)
+
+Student ID: 46
+Word Type: reading
+Mastered Words: out, each
+Column to update: reading_practice_mistakes
+Current DB value: out, each, friends, jump, fine
+Current Words Array: Array
+(
+    [0] => out
+    [1] => each
+    [2] => friends
+    [3] => jump
+    [4] => fine
+)
+
+Words Count Before: 5
+Remaining Words Array: Array
+(
+    [2] => friends
+    [3] => jump
+    [4] => fine
+)
+
+Words Count After: 3
+New DB Value: friends, jump, fine
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: friends, jump, fine
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"reading_practice_mistakes","words_before":5,"words_mastered":2,"words_remaining":3,"mastered_words":["out","each"],"remaining_words":["friends","jump","fine"],"new_db_value":"friends, jump, fine"}
+
+==================================================
+2026-01-26 09:14:04 - New Request
+Raw Input: {"sid":46,"word_type":"reading","mastered_words":["friends"]}
+Decoded Data: Array
+(
+    [sid] => 46
+    [word_type] => reading
+    [mastered_words] => Array
+        (
+            [0] => friends
+        )
+
+)
+
+Student ID: 46
+Word Type: reading
+Mastered Words: friends
+Column to update: reading_practice_mistakes
+Current DB value: friends, jump, fine
+Current Words Array: Array
+(
+    [0] => friends
+    [1] => jump
+    [2] => fine
+)
+
+Words Count Before: 3
+Remaining Words Array: Array
+(
+    [1] => jump
+    [2] => fine
+)
+
+Words Count After: 2
+New DB Value: jump, fine
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: jump, fine
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"reading_practice_mistakes","words_before":3,"words_mastered":1,"words_remaining":2,"mastered_words":["friends"],"remaining_words":["jump","fine"],"new_db_value":"jump, fine"}
+
+==================================================
+2026-01-26 09:15:40 - New Request
+Raw Input: {"sid":46,"word_type":"reading","mastered_words":["jump","fine"]}
+Decoded Data: Array
+(
+    [sid] => 46
+    [word_type] => reading
+    [mastered_words] => Array
+        (
+            [0] => jump
+            [1] => fine
+        )
+
+)
+
+Student ID: 46
+Word Type: reading
+Mastered Words: jump, fine
+Column to update: reading_practice_mistakes
+Current DB value: jump, fine
+Current Words Array: Array
+(
+    [0] => jump
+    [1] => fine
+)
+
+Words Count Before: 2
+Remaining Words Array: Array
+(
+)
+
+Words Count After: 0
+New DB Value: NULL
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: NULL
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"reading_practice_mistakes","words_before":2,"words_mastered":2,"words_remaining":0,"mastered_words":["jump","fine"],"remaining_words":[],"new_db_value":null}
+
+==================================================
+2026-01-26 09:15:40 - New Request
+Raw Input: {"sid":46,"word_type":"homework","mastered_words":["elephants"]}
+Decoded Data: Array
+(
+    [sid] => 46
+    [word_type] => homework
+    [mastered_words] => Array
+        (
+            [0] => elephants
+        )
+
+)
+
+Student ID: 46
+Word Type: homework
+Mastered Words: elephants
+Column to update: homework_mistakes
+Current DB value: elephants
+Current Words Array: Array
+(
+    [0] => elephants
+)
+
+Words Count Before: 1
+Remaining Words Array: Array
+(
+)
+
+Words Count After: 0
+New DB Value: NULL
+Update Success: YES
+Rows Affected: 1
+Verified DB Value After Update: NULL
+SUCCESS Response: {"success":true,"message":"Warmup updated successfully","column":"homework_mistakes","words_before":1,"words_mastered":1,"words_remaining":0,"mastered_words":["elephants"],"remaining_words":[],"new_db_value":null}

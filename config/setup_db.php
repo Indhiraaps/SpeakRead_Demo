@@ -1,7 +1,7 @@
 <?php
 $host = 'localhost';
 $user = 'root';
-$pass = 'skdn1418'; // CHANGE THIS TO YOUR PASSWORD
+$pass = '12345678'; // CHANGE THIS TO YOUR PASSWORD
 $dbname = 'speakread_db';
 
 try {
@@ -84,6 +84,23 @@ try {
             UNIQUE KEY unique_student (SID)
         )
     ");
+
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS HomeworkSchedule (
+            ID INT AUTO_INCREMENT PRIMARY KEY,
+            Grade VARCHAR(50) NOT NULL UNIQUE,
+            Mon TINYINT(1) NOT NULL DEFAULT 1,
+            Tue TINYINT(1) NOT NULL DEFAULT 1,
+            Wed TINYINT(1) NOT NULL DEFAULT 1,
+            Thu TINYINT(1) NOT NULL DEFAULT 1,
+            Fri TINYINT(1) NOT NULL DEFAULT 1,
+            Sat TINYINT(1) NOT NULL DEFAULT 1,
+            Sun TINYINT(1) NOT NULL DEFAULT 1,
+            CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_grade (Grade)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+ ");
 
     echo "✅ Database & tables created successfully!<br>";
     echo "✅ Warmup table configured for reading_practice and homework mistakes<br>";

@@ -73,12 +73,17 @@ if (!$hw) { die("Homework not found."); }
         }
         
         .reading-text { 
-            font-size: 28px; line-height: 1.9; padding: 35px 40px; 
-            background: #ffffff; border-radius: 20px; text-align: left; 
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
-            border: 2px solid rgba(102, 126, 234, 0.1);
-            max-height: 40vh; overflow-y: auto;
-        }
+    font-size: 28px; 
+    line-height: 1.9; 
+    padding: 35px 40px; 
+    background: #ffffff; 
+    border-radius: 20px; 
+    text-align: left; 
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+    border: 2px solid rgba(102, 126, 234, 0.1);
+    /* Removed max-height and overflow-y to show full passage */
+    margin-bottom: 20px; 
+}
         
         .word { 
             display: inline; transition: all 0.3s; color: #2d3748; 

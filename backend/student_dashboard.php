@@ -9,16 +9,40 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
 
 $student_id = $_SESSION['user_id'];
 $student_name = $_SESSION['user_name'] ?? 'Student';
-$grade = $_SESSION['user_grade'];
+$grade = $_SESSION['user_grade']; // Example: "Grade 3-A"
 $today = date('Y-m-d');
 
-try {
-    // 1. Fetch Today's Homework
-    $hwStmt = $pdo->prepare("SELECT HID, H_Topic, H_Para FROM Homework WHERE Grade = ? AND H_Date = ? AND IsActive = 1");
-    $hwStmt->execute([$grade, $today]);
-    $homework = $hwStmt->fetch();
+// Extract "Grade 3" from "Grade 3-A" or "Grade 3-B"
+if (preg_match('/(Grade\s\d+)/i', $grade, $matches)) {
+    $base_grade = $matches[1]; // Result: "Grade 3"
+} else {
+    $base_grade = $grade;
+}
 
-    // 2. Count Warmup Words from both columns
+// Get current day of week for homework schedule check
+$dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+$currentDay = $dayNames[date('w')]; // e.g., "Mon", "Tue"
+
+try {
+    // 1. CHECK IF HOMEWORK IS ENABLED FOR TODAY
+    $scheduleStmt = $pdo->prepare("SELECT $currentDay FROM HomeworkSchedule WHERE Grade = ?");
+    $scheduleStmt->execute([$base_grade]);
+    $schedule = $scheduleStmt->fetch();
+    
+    $isHomeworkActiveToday = true; // Default to active if no schedule exists
+    if ($schedule && isset($schedule[$currentDay])) {
+        $isHomeworkActiveToday = ($schedule[$currentDay] == 1);
+    }
+    
+    // 2. Fetch Today's Homework (ONLY if homework is active today)
+    $homework = null;
+    if ($isHomeworkActiveToday) {
+        $hwStmt = $pdo->prepare("SELECT HID, H_Topic, H_Para FROM homework WHERE Grade = ? AND H_Date = ? AND IsActive = 1");
+        $hwStmt->execute([$base_grade, $today]);
+        $homework = $hwStmt->fetch();
+    }
+
+    // 3. Count Warmup Words from both columns
     $warmupStmt = $pdo->prepare("SELECT homework_mistakes, reading_practice_mistakes FROM Warmup WHERE SID = ?");
     $warmupStmt->execute([$student_id]);
     $warmupData = $warmupStmt->fetch();
@@ -38,7 +62,7 @@ try {
     // Get first 5 words for display
     $recentWords = array_slice($warmupWords, 0, 5);
 
-    // 3. Calculate Stats from Scores table
+    // 4. Calculate Stats from Scores table
     $statsStmt = $pdo->prepare("
         SELECT 
             COUNT(*) as total_sessions,
@@ -52,14 +76,12 @@ try {
     $total_sessions = $stats['total_sessions'] ?? 0;
     $accuracy = $total_sessions > 0 ? round($stats['avg_accuracy']) : 0;
     
-    // Calculate total words read (estimate based on sessions)
-    $total_words_read = $total_sessions * 50; // Assuming ~50 words per session
+    $total_words_read = $total_sessions * 50; 
 
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -334,6 +356,15 @@ try {
 
         .status-none::before {
             content: '🌟';
+        }
+        
+        .status-disabled {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-disabled::before {
+            content: '📅';
         }
 
         .hw-topic {
@@ -631,7 +662,6 @@ try {
             }
         }
 
-        /* Speech bubble effect for homework */
         .speech-bubble {
             position: relative;
             background: var(--card-bg);
@@ -652,7 +682,6 @@ try {
             border-color: var(--primary-light) transparent;
         }
 
-        /* Star rating for accuracy */
         .star-rating {
             display: flex;
             justify-content: center;
@@ -702,7 +731,17 @@ try {
                     </div>
                 </div>
                 
-                <?php if ($homework): ?>
+                <?php if (!$isHomeworkActiveToday): ?>
+                    <!-- Homework Disabled for Today -->
+                    <span class="status-badge status-disabled">No Homework Today</span>
+                    <div class="no-content" style="padding: 20px;">
+                        <p style="margin: 0;">🌟 Your teacher has not scheduled homework for <?= htmlspecialchars($base_grade) ?> today (<?= date('l') ?>)!</p>
+                        <p style="margin-top: 10px; font-size: 14px; color: #94a3b8;">Enjoy your free time or practice your warmup words! 🎯</p>
+                    </div>
+                    <button class="btn btn-disabled" disabled>Homework Not Scheduled</button>
+                    
+                <?php elseif ($homework): ?>
+                    <!-- Homework Available -->
                     <span class="status-badge">New Assignment Available!</span>
                     
                     <div class="speech-bubble">
@@ -717,9 +756,10 @@ try {
                         </a>
                     </div>
                 <?php else: ?>
+                    <!-- No Homework Posted Yet -->
                     <div class="no-content">
-                        <p>No homework assigned for today!</p>
-                        <p style="margin-top: 10px; font-size: 14px;">Keep practicing your previous lessons! 🎯</p>
+                        <p>No homework posted for today yet!</p>
+                        <p style="margin-top: 10px; font-size: 14px;">Check back later or practice your warmup words! 🎯</p>
                     </div>
                     <button class="btn btn-disabled" disabled>No New Homework</button>
                 <?php endif; ?>
@@ -740,15 +780,9 @@ try {
                         <?= $warmupCount ?> word<?= $warmupCount > 1 ? 's' : '' ?> to practice!
                     </span>
                     
-                    <p style="color: var(--text-light); margin: 20px 0 10px;">Practice these words to improve:</p>
-                    
-                    <div class="word-list">
-                        <?php foreach ($recentWords as $word): ?>
-                            <span class="word-tag"><?= htmlspecialchars($word) ?></span>
-                        <?php endforeach; ?>
-                        <?php if ($warmupCount > 5): ?>
-                            <span class="word-tag more">+<?= $warmupCount - 5 ?> more</span>
-                        <?php endif; ?>
+                    <div class="no-content" style="padding: 10px 0;">
+                        <p style="font-size: 16px; color: var(--text);">You have some tricky words saved.</p>
+                        <p style="margin-top: 5px; font-size: 14px;">Click below to start your personalized warmup!</p>
                     </div>
                     
                     <div class="card-actions">
@@ -832,4 +866,4 @@ try {
         Logout
     </a>
 </body>
-</html>
+</html> 
