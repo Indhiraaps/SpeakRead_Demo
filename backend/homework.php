@@ -341,6 +341,52 @@ if (!$hw) { die("Homework not found."); }
     let readingAccuracy = 0;
     let transcriptWords = [];
 
+    // ============================================
+// NUMBER NORMALIZATION FUNCTIONS
+// ============================================
+
+// Convert number words to digits
+function wordToNumber(word) {
+    const numbers = {
+        'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
+        'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9',
+        'ten': '10', 'eleven': '11', 'twelve': '12', 'thirteen': '13',
+        'fourteen': '14', 'fifteen': '15', 'sixteen': '16', 'seventeen': '17',
+        'eighteen': '18', 'nineteen': '19', 'twenty': '20', 'thirty': '30',
+        'forty': '40', 'fifty': '50', 'sixty': '60', 'seventy': '70',
+        'eighty': '80', 'ninety': '90', 'hundred': '100', 'thousand': '1000'
+    };
+    return numbers[word.toLowerCase()] || word;
+}
+
+// Convert digits to number words
+function numberToWord(num) {
+    const words = {
+        '0': 'zero', '1': 'one', '2': 'two', '3': 'three', '4': 'four',
+        '5': 'five', '6': 'six', '7': 'seven', '8': 'eight', '9': 'nine',
+        '10': 'ten', '11': 'eleven', '12': 'twelve', '13': 'thirteen',
+        '14': 'fourteen', '15': 'fifteen', '16': 'sixteen', '17': 'seventeen',
+        '18': 'eighteen', '19': 'nineteen', '20': 'twenty', '30': 'thirty',
+        '40': 'forty', '50': 'fifty', '60': 'sixty', '70': 'seventy',
+        '80': 'eighty', '90': 'ninety', '100': 'hundred', '1000': 'thousand'
+    };
+    return words[num] || num;
+}
+
+// Check if two words match (considering number variations)
+function wordsMatch(spoken, target) {
+    // Direct match
+    if (spoken === target) return true;
+    
+    // Check if spoken digit matches target word (4 matches "four")
+    if (numberToWord(spoken) === target) return true;
+    
+    // Check if spoken word matches target digit ("four" matches 4)
+    if (wordToNumber(spoken) === target) return true;
+    
+    return false;
+}
+
     // Warmup variables - STRICT 2 ATTEMPT RULE
     let warmupWords = [];
     let currentIndex = 0;
@@ -510,11 +556,14 @@ if (!$hw) { die("Homework not found."); }
         }
     }
 
-    function getSimilarityScore(spoken, target) {
-        if (spoken === target) return 1.0;
-        const dist = levenshtein(spoken, target);
-        return 1 - (dist / Math.max(spoken.length, target.length));
-    }
+  function getSimilarityScore(spoken, target) {
+    // Perfect match including number variations
+    if (wordsMatch(spoken, target)) return 1.0;
+    
+    // Calculate similarity score using Levenshtein distance
+    const dist = levenshtein(spoken, target);
+    return 1 - (dist / Math.max(spoken.length, target.length));
+}
 
     function stopSession() {
         if (recognition) {
@@ -551,9 +600,9 @@ if (!$hw) { die("Homework not found."); }
         synth.speak(intro);
     }
 
-    // ========================================
+    // ============================================
     // 🎯 WARMUP PRACTICE - STRICT 2 ATTEMPT RULE
-    // ========================================
+    // ============================================
     function practiceWord() {
         if (currentIndex >= warmupWords.length) {
             showComplete();

@@ -5,7 +5,7 @@ session_start();
 $host = 'localhost';
 $dbname = 'speakread_db';
 $user = 'root';
-$pass = '12345678'; // Change to YOUR password
+$pass = 'skdn1418'; // Change to YOUR password
 
 header('Content-Type: application/json');
 

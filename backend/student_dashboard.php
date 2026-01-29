@@ -851,12 +851,12 @@ try {
                     </div>
                 </div>
                 
-                <div class="card-actions">
-                    <a href="#" class="btn btn-primary">
-                        📈 View Details
-                        <span style="font-size: 20px;">→</span>
-                    </a>
-                </div>
+              <div class="card-actions">
+    <a href="analytics.php" class="btn btn-primary">
+        📈 View Details
+        <span style="font-size: 20px;">→</span>
+    </a>
+</div>
             </div>
         </div>
     </div>
