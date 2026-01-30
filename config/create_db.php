@@ -1,11 +1,13 @@
 <?php
-$host = 'localhost';
-$user = 'root';
-$pass = '12345678'; // CHANGE THIS TO YOUR PASSWORD
-$dbname = 'speakread_db';
+// Aiven Cloud Configuration
+$host = 'mysql-19588968-speakread000.g.aivencloud.com';
+$port = '25249'; // From your Aiven screenshot
+$user = 'avnadmin'; 
+$pass = 'AVNS_-hJYen-fDyBu9ApXbxH'; // Click the copy icon in Aiven
+$dbname = 'defaultdb';
 
 try {
-    $pdo = new PDO("mysql:host=$host", $user, $pass);
+    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Create DB
@@ -97,7 +99,7 @@ try {
             Sat TINYINT(1) NOT NULL DEFAULT 1,
             Sun TINYINT(1) NOT NULL DEFAULT 1,
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAM--P ON UPDATE CURRENT_TIMESTAMP,
+            UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX idx_grade (Grade)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
  ");
