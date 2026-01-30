@@ -22,7 +22,7 @@ Current mistakes: NULL
 Merged words: animals
 DATABASE ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'DateAdded' in 'field list'
 Error Code: 42S22
-Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\backend\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
+Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\api\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
 #1 {main}
 
 ==================================================
@@ -48,7 +48,7 @@ Current mistakes: NULL
 Merged words: fly
 DATABASE ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'DateAdded' in 'field list'
 Error Code: 42S22
-Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\backend\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
+Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\api\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
 #1 {main}
 
 ==================================================
@@ -74,7 +74,7 @@ Current mistakes: NULL
 Merged words: fly
 DATABASE ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'DateAdded' in 'field list'
 Error Code: 42S22
-Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\backend\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
+Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\api\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
 #1 {main}
 
 ==================================================
@@ -100,7 +100,7 @@ Current mistakes: NULL
 Merged words: fresh
 DATABASE ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'DateAdded' in 'field list'
 Error Code: 42S22
-Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\backend\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
+Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\api\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
 #1 {main}
 
 ==================================================
@@ -126,7 +126,7 @@ Current mistakes: NULL
 Merged words: our
 DATABASE ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'DateAdded' in 'field list'
 Error Code: 42S22
-Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\backend\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
+Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\api\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
 #1 {main}
 
 ==================================================
@@ -154,7 +154,7 @@ Current mistakes: NULL
 Merged words: falls, rain, this
 DATABASE ERROR: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'DateAdded' in 'field list'
 Error Code: 42S22
-Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\backend\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
+Stack Trace: #0 C:\Users\indhira\OneDrive\Desktop\SpeakRead_Demo\api\save_homework_mistakes.php(113): PDO->prepare('UPDATE Warmup S...')
 #1 {main}
 
 ==================================================

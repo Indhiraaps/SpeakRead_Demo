@@ -2,13 +2,15 @@
 session_start();
 
 // Database Configuration
-$host = 'localhost'; 
-$db   = 'speakread_db'; 
-$user = 'root'; 
-$pass = '12345678'; // ⚠️ CHANGE TO YOUR PASSWORD
+$host = 'mysql-19588968-speakread000.g.aivencloud.com'; 
+$db   = 'defaultdb'; 
+$port = '25249';
+$user = 'avnadmin'; 
+$pass = 'AVNS_-hJYen-fDyBu9ApXbxH'; // ⚠️ CHANGE TO YOUR PASSWORD
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+   // Change this line:
+$pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {

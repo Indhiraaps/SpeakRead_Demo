@@ -530,7 +530,7 @@ try {
                         <div class="card-title-icon">📅</div>
                         <h2>Daily Performance</h2>
                     </div>
-                    <span class="card-badge">Last 7 Days</span>
+                    <span class="card-badge">This week</span>
                 </div>
                 <div class="chart-container">
                     <canvas id="dailyChart"></canvas>

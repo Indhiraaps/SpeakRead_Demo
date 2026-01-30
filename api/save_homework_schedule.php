@@ -2,10 +2,11 @@
 session_start();
 
 // Database Configuration - ADJUST THIS TO MATCH YOUR SETUP
-$host = 'localhost';
-$dbname = 'speakread_db';
-$user = 'root';
-$pass = '12345678'; // Change to YOUR password
+$host = 'mysql-19588968-speakread000.g.aivencloud.com';
+$dbname = 'defaultdb';
+$port = '25249';
+$user = 'avnadmin';
+$pass = 'AVNS_-hJYen-fDyBu9ApXbxH'; // Change to YOUR password
 
 header('Content-Type: application/json');
 
@@ -21,10 +22,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'teacher') {
 
 try {
     // Connect to database
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-        $user,
-        $pass,
+    // Change this line:
+$pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass,
         [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC

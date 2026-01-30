@@ -1,6 +1,6 @@
 <?php
 session_start();
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = '12345678';
+$host = 'mysql-19588968-speakread000.g.aivencloud.com'; $db = 'defaultdb';$port = '25249'; $user = 'avnadmin'; $pass = 'AVNS_-hJYen-fDyBu9ApXbxH';
 $grade = $_GET['grade'] ?? '';
 $lesson = $_GET['lesson'] ?? '';
 
@@ -17,7 +17,8 @@ if (preg_match('/^(Grade\s+\d+)/i', $grade, $matches)) {
 }
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+    // Change this line:
+$pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Get students for this FULL grade (with section: "Grade 3 - A")

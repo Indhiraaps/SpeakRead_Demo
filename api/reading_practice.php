@@ -404,6 +404,68 @@ function numberToWord(num) {
     return words[num] || num;
 }
 
+// ============================================
+// MULTI-WORD MATCHING FOR COMPOUND WORDS
+// ============================================
+
+// Check if multiple spoken words can match a single target word
+function checkMultiWordMatch(spokenWords, startIndex, target) {
+    // Try combining 2-3 spoken words to match target
+    for (let numWords = 1; numWords <= 3; numWords++) {
+        if (startIndex + numWords > spokenWords.length) break;
+        
+        // Combine spoken words (remove spaces)
+        const combined = spokenWords
+            .slice(startIndex, startIndex + numWords)
+            .map(w => w.replace(/[^\w]/g, ''))
+            .join('');
+        
+        // Check if combined matches target
+        const score = getSimilarityScore(combined, target);
+        if (score >= 0.50) {
+            return { matched: true, wordsUsed: numWords, score: score };
+        }
+    }
+    
+    return { matched: false, wordsUsed: 0, score: 0 };
+}
+
+// Normalize compound words (handles spacing variations)
+function normalizeCompound(word) {
+    const compounds = {
+        'sometime': ['sometime', 'some time'],
+        'someone': ['someone', 'some one'],
+        'something': ['something', 'some thing'],
+        'somewhere': ['somewhere', 'some where'],
+        'anyone': ['anyone', 'any one'],
+        'anything': ['anything', 'any thing'],
+        'anywhere': ['anywhere', 'any where'],
+        'everyone': ['everyone', 'every one'],
+        'everything': ['everything', 'every thing'],
+        'everywhere': ['everywhere', 'every where'],
+        'maybe': ['maybe', 'may be'],
+        'cannot': ['cannot', 'can not'],
+        'into': ['into', 'in to'],
+        'onto': ['onto', 'on to'],
+        'outside': ['outside', 'out side'],
+        'inside': ['inside', 'in side']
+    };
+    
+    // Remove spaces for comparison
+    const normalized = word.replace(/\s+/g, '');
+    
+    // Check if it matches any compound variation
+    for (let [base, variations] of Object.entries(compounds)) {
+        for (let variant of variations) {
+            if (normalized === variant.replace(/\s+/g, '')) {
+                return base; // Return base form
+            }
+        }
+    }
+    
+    return normalized;
+}
+
 // Check if two words match (considering number variations)
 function wordsMatch(spoken, target) {
     // Direct match
@@ -462,46 +524,102 @@ function wordsMatch(spoken, target) {
         }
 
         function initSpeech() {
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-IN';
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-IN';
+    recognition.maxAlternatives = 1;
 
-            let lastProcessedLength = 0;
+    let restartTimeout;
+    let isManualStop = false;
 
-            recognition.onresult = (event) => {
-                // Show interim results in real-time
-                let interimTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    if (event.results[i].isFinal) {
-                        const transcript = event.results[i][0].transcript.trim().toLowerCase();
-                        processTranscript(transcript);
-                        lastProcessedLength = i + 1;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
-                }
-                
-                // Update live transcript with interim results
-                if (interimTranscript) {
-                    updateTranscriptDisplay(interimTranscript, false);
-                }
-            };
-
-            recognition.onend = () => {
-                if (document.getElementById('stopBtn').style.display !== 'none') {
-                    recognition.start();
-                }
-            };
-            
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-            };
-            
-            recognition.start();
+    recognition.onresult = (event) => {
+        // Show interim results in real-time
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                const transcript = event.results[i][0].transcript.trim().toLowerCase();
+                processTranscript(transcript);
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
         }
+        
+        // Update live transcript with interim results
+        if (interimTranscript) {
+            updateTranscriptDisplay(interimTranscript, false);
+        }
+    };
 
+    recognition.onend = () => {
+        console.log('🎤 Recognition ended');
+        
+        // Clear any pending restart
+        if (restartTimeout) {
+            clearTimeout(restartTimeout);
+        }
+        
+        // Only restart if STOP button is still visible (session active)
+        if (!isManualStop && document.getElementById('stopBtn').style.display !== 'none') {
+            console.log('🔄 Auto-restarting recognition...');
+            
+            // Add small delay before restart to avoid errors
+            restartTimeout = setTimeout(() => {
+                try {
+                    recognition.start();
+                    console.log('✅ Recognition restarted');
+                } catch (e) {
+                    console.error('❌ Restart failed:', e);
+                    // Try again after longer delay
+                    setTimeout(() => {
+                        try {
+                            recognition.start();
+                        } catch (e2) {
+                            console.error('❌ Second restart failed:', e2);
+                        }
+                    }, 500);
+                }
+            }, 100);
+        }
+    };
+    
+    recognition.onerror = (event) => {
+        console.error('🔴 Speech recognition error:', event.error);
+        
+        // Handle different error types
+        if (event.error === 'no-speech') {
+            console.log('⚠️ No speech detected - will auto-restart');
+            // Don't do anything - onend will handle restart
+        } else if (event.error === 'aborted') {
+            console.log('⚠️ Recognition aborted - will auto-restart');
+        } else if (event.error === 'network') {
+            console.error('❌ Network error - check internet connection');
+            alert('Network error. Please check your internet connection.');
+        } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            console.error('❌ Microphone permission denied');
+            alert('Microphone access denied. Please allow microphone access.');
+        }
+    };
+    
+    // Add function to stop recognition cleanly
+    window.stopRecognitionCleanly = function() {
+        isManualStop = true;
+        if (restartTimeout) {
+            clearTimeout(restartTimeout);
+        }
+        if (recognition) {
+            recognition.stop();
+        }
+    };
+    
+    try {
+        recognition.start();
+        console.log('✅ Recognition started');
+    } catch (e) {
+        console.error('❌ Failed to start recognition:', e);
+    }
+}
         function updateTranscriptDisplay(text, isFinal) {
             if (transcriptWords.length === 0) {
                 transcriptText.innerHTML = `<span class="transcript-word">${text}</span>`;
@@ -533,39 +651,61 @@ function wordsMatch(spoken, target) {
         }
 
         function processTranscript(transcript) {
-            const spokenWords = transcript.split(/\s+/).filter(w => w.length > 0);
-            
-            spokenWords.forEach(spokenWord => {
-                const cleanSpoken = spokenWord.replace(/[^\w]/g, '');
-                if (cleanSpoken.length === 0 || currentWordPointer >= targetWords.length) return;
-
-                let bestMatch = -1;
-                let bestScore = 0;
-
-                for (let i = currentWordPointer; i < Math.min(currentWordPointer + 4, targetWords.length); i++) {
-                    if (wordStates[i] === 'pending') {
-                        const score = getSimilarityScore(cleanSpoken, targetWords[i]);
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestMatch = i;
-                        }
-                    }
-                }
-
-                if (bestMatch !== -1 && bestScore >= 0.55) {
-                    markWord(bestMatch, true);
-                    addToTranscript(targetWords[bestMatch], true);
-                    currentWordPointer = bestMatch + 1;
-                } else if (wordStates[currentWordPointer] === 'pending') {
-                    markWord(currentWordPointer, false);
-                    addToTranscript(cleanSpoken, false);
-                    currentWordPointer++;
-                }
-                
-                updateLiveScore();
-            });
+    const spokenWords = transcript.split(/\s+/).filter(w => w.length > 0);
+    let spokenIndex = 0;
+    
+    while (spokenIndex < spokenWords.length && currentWordPointer < targetWords.length) {
+        const spokenWord = spokenWords[spokenIndex];
+        const cleanSpoken = spokenWord.replace(/[^\w]/g, '');
+        
+        if (cleanSpoken.length === 0) {
+            spokenIndex++;
+            continue;
         }
 
+        // Try to find best match in next 4 target words
+        let bestMatch = -1;
+        let bestScore = 0;
+        let wordsToSkip = 1; // How many spoken words to consume
+
+        for (let i = currentWordPointer; i < Math.min(currentWordPointer + 4, targetWords.length); i++) {
+            if (wordStates[i] === 'pending') {
+                // Check single word match
+                const singleScore = getSimilarityScore(cleanSpoken, targetWords[i]);
+                if (singleScore > bestScore) {
+                    bestScore = singleScore;
+                    bestMatch = i;
+                    wordsToSkip = 1;
+                }
+                
+                // Check multi-word match (e.g., "some time" vs "sometime")
+                const multiMatch = checkMultiWordMatch(spokenWords, spokenIndex, targetWords[i]);
+                if (multiMatch.matched && multiMatch.score > bestScore) {
+                    bestScore = multiMatch.score;
+                    bestMatch = i;
+                    wordsToSkip = multiMatch.wordsUsed;
+                }
+            }
+        }
+
+        // Lower threshold to 0.50 for more flexibility
+        if (bestMatch !== -1 && bestScore >= 0.50) {
+            markWord(bestMatch, true);
+            addToTranscript(targetWords[bestMatch], true);
+            currentWordPointer = bestMatch + 1;
+            spokenIndex += wordsToSkip; // Skip consumed words
+        } else if (wordStates[currentWordPointer] === 'pending') {
+            markWord(currentWordPointer, false);
+            addToTranscript(cleanSpoken, false);
+            currentWordPointer++;
+            spokenIndex++;
+        } else {
+            spokenIndex++;
+        }
+        
+        updateLiveScore();
+    }
+}
         function markWord(index, isCorrect) {
             if (wordStates[index] !== 'pending') return;
 
@@ -589,44 +729,52 @@ function wordsMatch(spoken, target) {
     // Perfect match including number variations
     if (wordsMatch(spoken, target)) return 1.0;
     
+    // Normalize compound words (handles "some time" vs "sometime")
+    const normalizedSpoken = normalizeCompound(spoken);
+    const normalizedTarget = normalizeCompound(target);
+    
+    if (normalizedSpoken === normalizedTarget) return 1.0;
+    
     // Calculate similarity score using Levenshtein distance
-    const dist = levenshtein(spoken, target);
-    return 1 - (dist / Math.max(spoken.length, target.length));
+    const dist = levenshtein(normalizedSpoken, normalizedTarget);
+    return 1 - (dist / Math.max(normalizedSpoken.length, normalizedTarget.length));
 }
 
         function stopSession() {
-            if (recognition) {
-                recognition.stop();
-                recognition.onend = null;
-            }
+    // Clean stop of recognition
+    if (window.stopRecognitionCleanly) {
+        window.stopRecognitionCleanly();
+    } else if (recognition) {
+        recognition.stop();
+        recognition.onend = null;
+    }
 
-            // Collect remaining unread words
-            for (let i = 0; i < targetWords.length; i++) {
-                if (wordStates[i] === 'pending') {
-                    const word = targetWords[i];
-                    if (word.length > 2 && !ignoreWords.has(word)) {
-                        wrongWordsList.push(word);
-                    }
-                }
+    // Collect remaining unread words
+    for (let i = 0; i < targetWords.length; i++) {
+        if (wordStates[i] === 'pending') {
+            const word = targetWords[i];
+            if (word.length > 2 && !ignoreWords.has(word)) {
+                wrongWordsList.push(word);
             }
-
-            document.getElementById('readingArea').style.display = 'none';
-            document.getElementById('transcriptSection').style.display = 'none';
-            document.getElementById('scoreDisplay').style.display = 'none';
-            document.getElementById('controls').style.display = 'none';
-            document.getElementById('status').style.display = 'none';
-            document.getElementById('micIndicator').classList.remove('active');
-            
-            const accuracy = Math.round((correctCount / targetWords.length) * 100);
-            
-            document.getElementById('results').style.display = 'block';
-            document.getElementById('accDisplay').innerText = accuracy + "%";
-            document.getElementById('remDisplay').innerText = getRemarks(accuracy);
-            
-            // Save wrong words
-            saveWrongWords();
         }
+    }
 
+    document.getElementById('readingArea').style.display = 'none';
+    document.getElementById('transcriptSection').style.display = 'none';
+    document.getElementById('scoreDisplay').style.display = 'none';
+    document.getElementById('controls').style.display = 'none';
+    document.getElementById('status').style.display = 'none';
+    document.getElementById('micIndicator').classList.remove('active');
+    
+    const accuracy = Math.round((correctCount / targetWords.length) * 100);
+    
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('accDisplay').innerText = accuracy + "%";
+    document.getElementById('remDisplay').innerText = getRemarks(accuracy);
+    
+    // Save wrong words
+    saveWrongWords();
+}
         function getRemarks(accuracy) {
             if (accuracy >= 95) return "Outstanding! Perfect reading!";
             if (accuracy >= 85) return "Excellent work!";

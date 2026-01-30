@@ -13,10 +13,11 @@ if (empty($grade)) {
     exit();
 }
 
-$host = 'localhost'; $db = 'speakread_db'; $user = 'root'; $pass = '12345678';
+$host = 'mysql-19588968-speakread000.g.aivencloud.com'; $port = '25249'; $db = 'defaultdb'; $user = 'avnadmin'; $pass = 'AVNS_-hJYen-fDyBu9ApXbxH';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+    // Change this line:
+$pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // SQL Query: Joining Students with Scores to get the Average Accuracy
