@@ -10,8 +10,12 @@
       "dest": "/api/$1"
     },
     {
+      "src": "/",
+      "dest": "/login.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/api/index.php"
+      "dest": "/$1"
     }
   ]
 }
